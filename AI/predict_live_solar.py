@@ -8,7 +8,7 @@ from pathlib import Path
 # ============================================
 
 MODEL_FILE = Path(
-    "weather_only_solar_model.pkl"
+    "models/weather_only_solar_model.pkl"
 )
 
 FORECAST_FILE = Path(

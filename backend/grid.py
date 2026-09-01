@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from datetime import datetime, timezone
@@ -8,6 +9,10 @@ from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException
 
 from backend.demand_history import log_pgcb_observation
+from database.connection import get_session
+from database.models import GridSnapshot
+
+logger = logging.getLogger("powerflex.grid")
 
 
 # =========================================================
@@ -18,6 +23,91 @@ router = APIRouter(
     prefix="/api/grid",
     tags=["Bangladesh Grid"],
 )
+
+
+# =========================================================
+# LOG GRID SNAPSHOT TO POSTGRESQL
+# =========================================================
+
+def log_grid_snapshot(
+    timestamp: str,
+    demand_mw: float,
+    supply_mw: float,
+    load_shedding_mw: float = None,
+    gas_mw: float = None,
+    liquid_fuel_mw: float = None,
+    coal_mw: float = None,
+    hydro_mw: float = None,
+    solar_mw: float = None,
+    wind_mw: float = None,
+    hvdc_mw: float = None,
+    import_mw: float = None,
+    grid_status: str = None,
+    risk_level: str = None,
+    raw_html: str = None,
+) -> bool:
+
+    try:
+        session = get_session()
+        try:
+            existing = (
+                session.query(GridSnapshot)
+                .filter(GridSnapshot.timestamp == timestamp)
+                .first()
+            )
+            if existing:
+                return False
+
+            snapshot = GridSnapshot(
+                timestamp=timestamp,
+                demand_mw=round(demand_mw, 1)
+                if demand_mw else None,
+                supply_mw=round(supply_mw, 1)
+                if supply_mw else None,
+                load_shedding_mw=round(load_shedding_mw, 1)
+                if load_shedding_mw else None,
+                gas_mw=round(gas_mw, 1)
+                if gas_mw else None,
+                liquid_fuel_mw=round(liquid_fuel_mw, 1)
+                if liquid_fuel_mw else None,
+                coal_mw=round(coal_mw, 1)
+                if coal_mw else None,
+                hydro_mw=round(hydro_mw, 1)
+                if hydro_mw else None,
+                solar_mw=round(solar_mw, 1)
+                if solar_mw else None,
+                wind_mw=round(wind_mw, 1)
+                if wind_mw else None,
+                hvdc_mw=round(hvdc_mw, 1)
+                if hvdc_mw else None,
+                import_mw=round(import_mw, 1)
+                if import_mw else None,
+                grid_status=grid_status,
+                risk_level=risk_level,
+                raw_html=raw_html,
+            )
+            session.add(snapshot)
+            session.commit()
+            logger.info(
+                "Grid snapshot recorded: %s", timestamp
+            )
+            return True
+
+        except Exception as e:
+            session.rollback()
+            logger.error(
+                "Failed to record grid snapshot: %s", e
+            )
+            return False
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.error(
+            "Database unavailable for grid snapshot: %s", e
+        )
+        return False
 
 
 # =========================================================
@@ -763,6 +853,15 @@ def official_pgcb_data():
         source="PGCB_ERP",
     )
 
+    log_grid_snapshot(
+        timestamp=data["timestamp"],
+        demand_mw=data["current_demand_mw"],
+        supply_mw=data["current_supply_mw"],
+        load_shedding_mw=data["load_shedding_mw"],
+        grid_status=None,
+        risk_level=None,
+    )
+
     return {
         "project": "PowerFlex BD",
         "status": "LIVE",
@@ -823,6 +922,26 @@ def live_grid():
             "demand_supply_gap_mw", 0.0
         ),
         source="PGCB_ERP",
+    )
+
+    generation = grid.get("generation_breakdown", {})
+    imports = grid.get("imports", {})
+
+    log_grid_snapshot(
+        timestamp=grid.get("timestamp", ""),
+        demand_mw=demand,
+        supply_mw=supply,
+        load_shedding_mw=load_shed,
+        gas_mw=generation.get("gas_mw"),
+        liquid_fuel_mw=generation.get("liquid_fuel_mw"),
+        coal_mw=generation.get("coal_mw"),
+        hydro_mw=generation.get("hydro_mw"),
+        solar_mw=generation.get("solar_mw"),
+        wind_mw=generation.get("wind_mw"),
+        hvdc_mw=imports.get("india_bheramara_hvdc_mw"),
+        import_mw=imports.get("total_imports_mw"),
+        grid_status=grid_status,
+        risk_level=risk_level,
     )
 
     if demand is not None and supply is not None:

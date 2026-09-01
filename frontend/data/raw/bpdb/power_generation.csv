@@ -1,6 +1,0 @@
-date,zone,power_station,unit_capacity_mw,installed_capacity_mw,derated_capacity_mw,forecast_day_peak_mw,forecast_evening_peak_mw,actual_day_peak_mw,actual_evening_peak_mw
-12-07-2026,Dhaka,Ghorashal Repowered CCPP Unit 3 (GT),260,260,260,0,0,0,0
-12-07-2026,Dhaka,Ghorasal Repowered CCPP UNIT-4,210,210,180,230,230,0,0
-12-07-2026,Dhaka,b) Ghorasal TPP Unit 5,210,210,190,190,190,0,0
-12-07-2026,Dhaka,Ghorashal 365 MW CCPP Unit-7,380,365,365,260,260,0,0
-12-07-2026,Dhaka,Ghorashal 108 MW PP (Regent),108,108,99,98,98,0,0

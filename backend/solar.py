@@ -1,11 +1,16 @@
+import json
 import logging
 import concurrent.futures
 import requests
 import pandas as pd
 import joblib
 
+from datetime import datetime, timezone
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
+
+from database.connection import get_session
+from database.models import AIPrediction
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +26,66 @@ router = APIRouter(
 
 
 # =========================================================
+# LOG AI PREDICTION TO POSTGRESQL
+# =========================================================
+
+def log_ai_prediction(
+    model_type: str,
+    zone: str,
+    predicted_mw: float,
+    features: dict = None,
+    model_version: str = None,
+) -> bool:
+
+    try:
+        session = get_session()
+        try:
+            now = datetime.now(timezone.utc)
+            existing = (
+                session.query(AIPrediction)
+                .filter(
+                    AIPrediction.model_type == model_type,
+                    AIPrediction.zone == zone,
+                    AIPrediction.timestamp >= now.replace(
+                        hour=0, minute=0, second=0,
+                        microsecond=0
+                    ),
+                )
+                .first()
+            )
+            if existing:
+                return False
+
+            prediction = AIPrediction(
+                timestamp=now,
+                model_type=model_type,
+                zone=zone,
+                predicted_mw=round(predicted_mw, 4),
+                features_json=features,
+                model_version=model_version,
+            )
+            session.add(prediction)
+            session.commit()
+            return True
+
+        except Exception as e:
+            session.rollback()
+            logger.warning(
+                "Failed to log AI prediction: %s", e
+            )
+            return False
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.warning(
+            "Database unavailable for AI prediction: %s", e
+        )
+        return False
+
+
+# =========================================================
 # PROJECT ROOT
 # =========================================================
 
@@ -31,7 +96,7 @@ PROJECT_ROOT = Path(
 
 MODEL_FILE = (
     PROJECT_ROOT /
-    "weather_only_solar_model.pkl"
+    "models/weather_only_solar_model.pkl"
 )
 
 
@@ -374,6 +439,25 @@ def live_solar_forecast():
     # =====================================================
 
     best_zone = daily.iloc[0]
+
+
+    # =====================================================
+    # LOG PREDICTIONS TO DATABASE
+    # =====================================================
+
+    for _, row in daily.iterrows():
+        log_ai_prediction(
+            model_type="solar",
+            zone=row["zone"],
+            predicted_mw=float(
+                row["expected_energy_mwh_per_1mw_24h"]
+            ),
+            features={
+                "forecast_hours": 24,
+                "model": "weather_only_solar",
+            },
+            model_version="weather_only_solar_v1",
+        )
 
 
     # =====================================================

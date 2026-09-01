@@ -1,9 +1,13 @@
 from fastapi import APIRouter, HTTPException
+from datetime import datetime
+import json
 import logging
 
 from backend.services.grid_service import get_grid_live
 from backend.services.solar_service import get_solar_live
 from backend.services.wind_service import get_wind_live
+from database.connection import get_session
+from database.models import LoadshieldDispatch
 
 logger = logging.getLogger("powerflex.loadshield")
 
@@ -47,6 +51,44 @@ def safe_float(value):
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+# =========================================================
+# DATABASE LOGGING
+# =========================================================
+
+def log_dispatch(
+    demand_mw, supply_mw, deficit_mw,
+    solar_mw, wind_mw, hydro_mw, biomass_mw, waste_mw,
+    battery_mw, flexible_mw, remaining_gap,
+    status, risk_level, zone_breakdown,
+):
+    """Log a LoadShield dispatch decision to PostgreSQL."""
+    try:
+        session = get_session()
+        with session:
+            dispatch = LoadshieldDispatch(
+                timestamp=datetime.now(),
+                demand_mw=demand_mw,
+                supply_mw=supply_mw,
+                deficit_mw=deficit_mw,
+                solar_mw=solar_mw,
+                wind_mw=wind_mw,
+                hydro_mw=hydro_mw,
+                biomass_mw=biomass_mw,
+                waste_mw=waste_mw,
+                battery_mw=battery_mw,
+                flexible_mw=flexible_mw,
+                remaining_gap=remaining_gap,
+                status=status,
+                risk_level=risk_level,
+                zone_breakdown=zone_breakdown,
+            )
+            session.add(dispatch)
+            session.commit()
+            logger.info(f"Dispatch logged: status={status}, risk={risk_level}, deficit={deficit_mw}")
+    except Exception as e:
+        logger.error(f"Failed to log dispatch: {e}")
 
 
 # =========================================================
@@ -673,6 +715,23 @@ def loadshield_live():
                     "MODEL_FORECAST",
             }
 
+        log_dispatch(
+            demand_mw=demand_mw,
+            supply_mw=supply_mw,
+            deficit_mw=0.0,
+            solar_mw=resource_data.get("solar", {}).get("generation_mw"),
+            wind_mw=resource_data.get("wind", {}).get("generation_mw"),
+            hydro_mw=resource_data.get("hydro", {}).get("generation_mw"),
+            biomass_mw=resource_data.get("biomass", {}).get("generation_mw"),
+            waste_mw=resource_data.get("waste", {}).get("generation_mw"),
+            battery_mw=BATTERY_POWER_MW,
+            flexible_mw=FLEXIBLE_DEMAND_MW,
+            remaining_gap=0.0,
+            status="SUPPLY_SUFFICIENT",
+            risk_level="LOW",
+            zone_breakdown=json.dumps([]),
+        )
+
         return {
             "project": "PowerFlex BD",
             "module": "LoadShield",
@@ -881,9 +940,26 @@ def loadshield_live():
         }
 
     # =====================================================
-    # 10. RESPONSE
+    # 10. LOG DISPATCH + RESPONSE
     # =====================================================
     logger.info("LOADSHIELD_STAGE=response status=%s deficit=%s", result.get("status"), deficit_mw)
+
+    log_dispatch(
+        demand_mw=demand_mw,
+        supply_mw=supply_mw,
+        deficit_mw=deficit_mw,
+        solar_mw=resource_data.get("solar", {}).get("generation_mw"),
+        wind_mw=resource_data.get("wind", {}).get("generation_mw"),
+        hydro_mw=resource_data.get("hydro", {}).get("generation_mw"),
+        biomass_mw=resource_data.get("biomass", {}).get("generation_mw"),
+        waste_mw=resource_data.get("waste", {}).get("generation_mw"),
+        battery_mw=BATTERY_POWER_MW,
+        flexible_mw=FLEXIBLE_DEMAND_MW,
+        remaining_gap=remaining_gap,
+        status=result["status"],
+        risk_level=risk_level,
+        zone_breakdown=json.dumps(result["zone_analysis"]),
+    )
 
     return {
         "project": "PowerFlex BD",

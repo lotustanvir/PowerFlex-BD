@@ -1,11 +1,14 @@
 import pandas as pd
 import joblib
 
+from datetime import datetime
 from xgboost import XGBRegressor
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from database.connection import get_session
+from database.models import ModelRegistry
 
 
 # ==========================================================
@@ -14,7 +17,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 input_file = "data/processed/solar_training_data.csv"
 
-model_file = "solar_forecast_model.pkl"
+model_file = "models/solar_forecast_model.pkl"
 
 
 # ==========================================================
@@ -247,3 +250,28 @@ print(
 )
 
 print("\nSolar AI model training completed successfully!")
+
+
+# ==========================================================
+# 15. LOG TO MODEL REGISTRY
+# ==========================================================
+
+try:
+    session = get_session()
+    with session:
+        registry_entry = ModelRegistry(
+            model_type="solar",
+            model_path=model_file,
+            trained_at=datetime.now(),
+            training_samples=len(X_train),
+            mae=round(mae, 6),
+            rmse=round(rmse, 6),
+            r2=round(r2, 6),
+            features=features,
+            is_active=True,
+        )
+        session.add(registry_entry)
+        session.commit()
+        print("Model registry entry created successfully!")
+except Exception as e:
+    print(f"Failed to log model registry: {e}")

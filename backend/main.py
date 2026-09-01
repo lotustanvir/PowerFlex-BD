@@ -24,6 +24,7 @@ from backend.demand_history import router as history_router
 from backend.resource_data import router as resource_router
 from backend.biomass_data import router as biomass_router
 from backend.waste_data import router as waste_router
+from backend.history_api import router as history_api_router
 
 
 app = FastAPI(
@@ -110,9 +111,13 @@ app.include_router(
     waste_router
 )
 
+app.include_router(
+    history_api_router
+)
+
 
 MODEL_FILE = Path(
-    "weather_only_solar_model.pkl"
+    "models/weather_only_solar_model.pkl"
 )
 
 

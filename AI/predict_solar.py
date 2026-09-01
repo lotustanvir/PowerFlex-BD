@@ -6,7 +6,7 @@ import joblib
 # 1. LOAD TRAINED MODEL
 # ============================================
 
-MODEL_FILE = "solar_forecast_model.pkl"
+MODEL_FILE = "models/solar_forecast_model.pkl"
 
 print("Loading trained Solar AI model...")
 

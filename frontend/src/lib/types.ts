@@ -298,3 +298,97 @@ export type DataClassification =
   | "STATIC_DOCUMENTED_DATA"
   | "DATA_UNAVAILABLE"
   | "PROTOTYPE";
+
+// =========================================================
+// HISTORY API RESPONSES
+// =========================================================
+
+export interface GridHistoryItem {
+  id: number;
+  timestamp: string | null;
+  demand_mw: number | null;
+  supply_mw: number | null;
+  load_shedding_mw: number | null;
+  deficit_mw: number | null;
+  gas_mw: number | null;
+  liquid_fuel_mw: number | null;
+  coal_mw: number | null;
+  hydro_mw: number | null;
+  solar_mw: number | null;
+  wind_mw: number | null;
+  hvdc_mw: number | null;
+  import_mw: number | null;
+  grid_status: string | null;
+  risk_level: string | null;
+}
+
+export interface GridHistoryResponse {
+  total: number;
+  limit: number;
+  offset: number;
+  data: GridHistoryItem[];
+}
+
+export interface PredictionHistoryItem {
+  id: number;
+  timestamp: string | null;
+  model_type: string;
+  zone: string | null;
+  predicted_mw: number | null;
+  actual_mw: number | null;
+  features_json: Record<string, unknown> | null;
+  model_version: string | null;
+}
+
+export interface PredictionsHistoryResponse {
+  total: number;
+  limit: number;
+  offset: number;
+  data: PredictionHistoryItem[];
+}
+
+export interface LoadShieldHistoryItem {
+  id: number;
+  timestamp: string | null;
+  demand_mw: number | null;
+  supply_mw: number | null;
+  deficit_mw: number | null;
+  solar_mw: number | null;
+  wind_mw: number | null;
+  hydro_mw: number | null;
+  biomass_mw: number | null;
+  waste_mw: number | null;
+  battery_mw: number | null;
+  flexible_mw: number | null;
+  remaining_gap: number | null;
+  status: string | null;
+  risk_level: string | null;
+  zone_breakdown: unknown[] | null;
+}
+
+export interface LoadShieldHistoryResponse {
+  total: number;
+  limit: number;
+  offset: number;
+  data: LoadShieldHistoryItem[];
+}
+
+export interface ModelRegistryItem {
+  id: number;
+  model_type: string;
+  model_path: string | null;
+  trained_at: string | null;
+  training_samples: number | null;
+  mae: number | null;
+  rmse: number | null;
+  r2: number | null;
+  features: string[] | null;
+  is_active: boolean;
+}
+
+export interface ModelRegistryResponse {
+  total: number;
+  limit: number;
+  offset: number;
+  data: ModelRegistryItem[];
+}

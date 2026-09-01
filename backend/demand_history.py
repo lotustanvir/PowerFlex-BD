@@ -1,23 +1,17 @@
 import csv
-import os
+import io
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 
+from database.connection import get_session
+from database.models import DemandHistory
 
-# =========================================================
-# POWERFLEX BD - DEMAND HISTORY LOGGER
-# =========================================================
-#
-# Records official PGCB demand observations to CSV.
-# Used for future model retraining.
-#
-# data_classification = "OFFICIAL_PGCB"
-# Never records fabricated values.
-# =========================================================
+logger = logging.getLogger("powerflex.demand_history")
 
 
 # =========================================================
@@ -31,53 +25,15 @@ router = APIRouter(
 
 
 # =========================================================
-# PROJECT ROOT
+# PROJECT ROOT (for CSV backup reference only)
 # =========================================================
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+HISTORY_FILE = PROJECT_ROOT / "data" / "pgcb_demand_history.csv"
 
 
 # =========================================================
-# CSV PATH
-# =========================================================
-
-DATA_DIR = PROJECT_ROOT / "data"
-HISTORY_FILE = DATA_DIR / "pgcb_demand_history.csv"
-
-CSV_HEADERS = [
-    "timestamp",
-    "pgcb_timestamp",
-    "demand_mw",
-    "supply_mw",
-    "load_shedding_mw",
-    "deficit_mw",
-    "source",
-    "data_classification",
-]
-
-
-# =========================================================
-# ENSURE CSV EXISTS
-# =========================================================
-
-def ensure_csv():
-    DATA_DIR.mkdir(exist_ok=True)
-
-    if not HISTORY_FILE.exists():
-
-        with open(
-            HISTORY_FILE,
-            "w",
-            newline="",
-            encoding="utf-8",
-        ) as f:
-
-            writer = csv.writer(f)
-            writer.writerow(CSV_HEADERS)
-
-
-# =========================================================
-# DUPLICATE CHECK
+# DUPLICATE CHECK (PostgreSQL)
 # =========================================================
 
 def is_duplicate(
@@ -86,40 +42,34 @@ def is_duplicate(
     supply_mw: float,
 ) -> bool:
 
-    if not HISTORY_FILE.exists():
-        return False
-
     try:
+        session = get_session()
+        try:
+            existing = (
+                session.query(DemandHistory)
+                .filter(
+                    DemandHistory.pgcb_timestamp
+                    == pgcb_timestamp,
+                    DemandHistory.demand_mw
+                    == round(demand_mw, 1),
+                    DemandHistory.supply_mw
+                    == round(supply_mw, 1),
+                )
+                .first()
+            )
+            return existing is not None
+        finally:
+            session.close()
 
-        with open(
-            HISTORY_FILE,
-            "r",
-            encoding="utf-8",
-        ) as f:
-
-            reader = csv.DictReader(f)
-
-            for row in reader:
-
-                if (
-                    row.get("pgcb_timestamp")
-                    == pgcb_timestamp
-                    and row.get("demand_mw")
-                    == str(demand_mw)
-                    and row.get("supply_mw")
-                    == str(supply_mw)
-                ):
-
-                    return True
-
-        return False
-
-    except Exception:
+    except Exception as e:
+        logger.warning(
+            "Duplicate check failed (DB unavailable): %s", e
+        )
         return False
 
 
 # =========================================================
-# APPEND RECORD
+# APPEND RECORD (PostgreSQL)
 # =========================================================
 
 def log_pgcb_observation(
@@ -139,85 +89,124 @@ def log_pgcb_observation(
     ):
         return False
 
-    ensure_csv()
-
-    now = datetime.now(timezone.utc).isoformat()
-
     try:
-
-        with open(
-            HISTORY_FILE,
-            "a",
-            newline="",
-            encoding="utf-8",
-        ) as f:
-
-            writer = csv.writer(f)
-
-            writer.writerow([
-                now,
+        session = get_session()
+        try:
+            observation = DemandHistory(
+                timestamp=datetime.now(timezone.utc),
+                pgcb_timestamp=pgcb_timestamp,
+                demand_mw=round(demand_mw, 1),
+                supply_mw=round(supply_mw, 1),
+                load_shedding_mw=(
+                    round(load_shedding_mw, 1)
+                    if load_shedding_mw
+                    else 0.0
+                ),
+                deficit_mw=round(deficit_mw, 1),
+                source=source,
+                data_classification="OFFICIAL_PGCB",
+            )
+            session.add(observation)
+            session.commit()
+            logger.info(
+                "PGCB observation recorded: %s",
                 pgcb_timestamp,
-                round(demand_mw, 1),
-                round(supply_mw, 1),
-                round(
-                    load_shedding_mw, 1
-                ) if load_shedding_mw else 0.0,
-                round(deficit_mw, 1),
-                source,
-                "OFFICIAL_PGCB",
-            ])
+            )
+            return True
 
-        return True
+        except Exception as e:
+            session.rollback()
+            logger.error(
+                "Failed to record PGCB observation: %s", e
+            )
+            return False
 
-    except Exception:
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.error(
+            "Database unavailable for PGCB observation: %s", e
+        )
         return False
 
 
 # =========================================================
-# READ HISTORY
+# READ HISTORY (PostgreSQL)
 # =========================================================
 
 def read_history() -> list:
 
-    if not HISTORY_FILE.exists():
-        return []
-
     try:
+        session = get_session()
+        try:
+            records = (
+                session.query(DemandHistory)
+                .order_by(DemandHistory.timestamp.asc())
+                .all()
+            )
 
-        with open(
-            HISTORY_FILE,
-            "r",
-            encoding="utf-8",
-        ) as f:
+            return [
+                {
+                    "timestamp": (
+                        r.timestamp.isoformat()
+                        if r.timestamp else None
+                    ),
+                    "pgcb_timestamp": (
+                        r.pgcb_timestamp.isoformat()
+                        if r.pgcb_timestamp else None
+                    ),
+                    "demand_mw": (
+                        float(r.demand_mw)
+                        if r.demand_mw else None
+                    ),
+                    "supply_mw": (
+                        float(r.supply_mw)
+                        if r.supply_mw else None
+                    ),
+                    "load_shedding_mw": (
+                        float(r.load_shedding_mw)
+                        if r.load_shedding_mw else None
+                    ),
+                    "deficit_mw": (
+                        float(r.deficit_mw)
+                        if r.deficit_mw else None
+                    ),
+                    "source": r.source,
+                    "data_classification": (
+                        r.data_classification
+                    ),
+                }
+                for r in records
+            ]
 
-            reader = csv.DictReader(f)
-            return list(reader)
+        finally:
+            session.close()
 
-    except Exception:
+    except Exception as e:
+        logger.warning(
+            "Failed to read history from DB: %s", e
+        )
         return []
 
 
 # =========================================================
-# COUNT RECORDS
+# COUNT RECORDS (PostgreSQL)
 # =========================================================
 
 def count_records() -> int:
 
-    if not HISTORY_FILE.exists():
-        return 0
-
     try:
+        session = get_session()
+        try:
+            return session.query(DemandHistory).count()
+        finally:
+            session.close()
 
-        with open(
-            HISTORY_FILE,
-            "r",
-            encoding="utf-8",
-        ) as f:
-
-            reader = csv.DictReader(f)
-            return sum(1 for _ in reader)
-
-    except Exception:
+    except Exception as e:
+        logger.warning(
+            "Failed to count records from DB: %s", e
+        )
         return 0
 
 
@@ -227,9 +216,6 @@ def count_records() -> int:
 
 @router.get("/history")
 def get_demand_history():
-    """
-    Return metadata about the PGCB demand history dataset.
-    """
 
     records = read_history()
     count = len(records)
@@ -262,6 +248,7 @@ def get_demand_history():
         "project": "PowerFlex BD",
         "module": "Demand History",
         "record_count": count,
+        "storage": "postgresql",
         "latest_record": {
             "timestamp": latest.get("timestamp")
             if latest else None,
@@ -284,7 +271,6 @@ def get_demand_history():
         "latest_load_shedding_mw": latest_load_shed,
         "data_source": "PGCB_ERP",
         "data_classification": "OFFICIAL_PGCB",
-        "file_path": str(HISTORY_FILE),
         "message": (
             f"{count} official PGCB observations "
             f"recorded."
@@ -298,23 +284,51 @@ def get_demand_history():
 
 @router.get("/history/export")
 def export_demand_history():
-    """
-    Download the PGCB demand history CSV file.
-    """
 
-    if not HISTORY_FILE.exists():
+    records = read_history()
+
+    if not records:
 
         raise HTTPException(
             status_code=404,
             detail=(
-                "No demand history file found. "
+                "No demand history data found. "
                 "Data will be collected when PGCB "
                 "grid data is fetched."
             ),
         )
 
-    return FileResponse(
-        path=str(HISTORY_FILE),
-        filename="pgcb_demand_history.csv",
+    output = io.StringIO()
+    fieldnames = [
+        "timestamp",
+        "pgcb_timestamp",
+        "demand_mw",
+        "supply_mw",
+        "load_shedding_mw",
+        "deficit_mw",
+        "source",
+        "data_classification",
+    ]
+
+    writer = csv.DictWriter(
+        output, fieldnames=fieldnames
+    )
+    writer.writeheader()
+
+    for record in records:
+        writer.writerow({
+            k: record.get(k, "") for k in fieldnames
+        })
+
+    output.seek(0)
+
+    return StreamingResponse(
+        iter([output.getvalue()]),
         media_type="text/csv",
+        headers={
+            "Content-Disposition": (
+                "attachment; "
+                "filename=pgcb_demand_history.csv"
+            ),
+        },
     )

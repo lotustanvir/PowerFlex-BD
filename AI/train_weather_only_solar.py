@@ -1,12 +1,15 @@
 import pandas as pd
 import joblib
 
+from datetime import datetime
 from pathlib import Path
 from xgboost import XGBRegressor
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from database.connection import get_session
+from database.models import ModelRegistry
 
 
 # ==========================================================
@@ -18,7 +21,7 @@ INPUT_FILE = Path(
 )
 
 MODEL_FILE = Path(
-    "weather_only_solar_model.pkl"
+    "models/weather_only_solar_model.pkl"
 )
 
 
@@ -308,3 +311,28 @@ print(
 
 
 print("\nWeather-Only Solar AI training completed!")
+
+
+# ==========================================================
+# 19. LOG TO MODEL REGISTRY
+# ==========================================================
+
+try:
+    session = get_session()
+    with session:
+        registry_entry = ModelRegistry(
+            model_type="weather_only_solar",
+            model_path=str(MODEL_FILE),
+            trained_at=datetime.now(),
+            training_samples=len(X_train),
+            mae=round(mae, 6),
+            rmse=round(rmse, 6),
+            r2=round(r2, 6),
+            features=features,
+            is_active=True,
+        )
+        session.add(registry_entry)
+        session.commit()
+        print("Model registry entry created successfully!")
+except Exception as e:
+    print(f"Failed to log model registry: {e}")

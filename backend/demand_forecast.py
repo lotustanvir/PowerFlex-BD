@@ -1,5 +1,7 @@
+import json
 import math
 import random
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
@@ -11,6 +13,10 @@ from pathlib import Path
 
 from backend.demand_history import count_records
 from backend.services.grid_service import get_grid_live
+from database.connection import get_session
+from database.models import AIPrediction
+
+logger = logging.getLogger("powerflex.demand_forecast")
 
 
 # =========================================================
@@ -39,6 +45,66 @@ router = APIRouter(
     prefix="/api/demand",
     tags=["Demand Forecast"],
 )
+
+
+# =========================================================
+# LOG AI PREDICTION TO POSTGRESQL
+# =========================================================
+
+def log_ai_prediction(
+    model_type: str,
+    zone: str,
+    predicted_mw: float,
+    features: dict = None,
+    model_version: str = None,
+) -> bool:
+
+    try:
+        session = get_session()
+        try:
+            now = datetime.now(timezone.utc)
+            existing = (
+                session.query(AIPrediction)
+                .filter(
+                    AIPrediction.model_type == model_type,
+                    AIPrediction.zone == zone,
+                    AIPrediction.timestamp >= now.replace(
+                        hour=0, minute=0, second=0,
+                        microsecond=0
+                    ),
+                )
+                .first()
+            )
+            if existing:
+                return False
+
+            prediction = AIPrediction(
+                timestamp=now,
+                model_type=model_type,
+                zone=zone,
+                predicted_mw=round(predicted_mw, 4),
+                features_json=features,
+                model_version=model_version,
+            )
+            session.add(prediction)
+            session.commit()
+            return True
+
+        except Exception as e:
+            session.rollback()
+            logger.warning(
+                "Failed to log AI prediction: %s", e
+            )
+            return False
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.warning(
+            "Database unavailable for AI prediction: %s", e
+        )
+        return False
 
 
 # =========================================================
@@ -586,5 +652,40 @@ def get_demand_forecast():
         "model_status": model_status,
         "data_classification": "MODEL_FORECAST",
     }
+
+
+    # =====================================================
+    # LOG PREDICTIONS TO DATABASE
+    # =====================================================
+
+    log_ai_prediction(
+        model_type="demand",
+        zone="national",
+        predicted_mw=forecast["forecast_peak_mw"],
+        features={
+            "current_demand_mw": current_demand,
+            "forecast_hours": 24,
+            "model": "XGBoost/GradientBoosting",
+            "weather_status": forecast.get(
+                "weather_data_status"
+            ),
+        },
+        model_version="demand_forecast_v1",
+    )
+
+    for entry in forecast.get("hourly_forecast", []):
+        log_ai_prediction(
+            model_type="demand_hourly",
+            zone="national",
+            predicted_mw=entry["predicted_demand_mw"],
+            features={
+                "hour_bst": entry.get("hour_bst"),
+                "temperature_c": entry.get(
+                    "temperature_c"
+                ),
+            },
+            model_version="demand_forecast_v1",
+        )
+
 
     return forecast

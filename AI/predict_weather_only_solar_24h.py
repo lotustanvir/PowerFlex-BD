@@ -7,7 +7,7 @@ from pathlib import Path
 # FILE PATHS
 # ============================================
 
-MODEL_FILE = Path("weather_only_solar_model.pkl")
+MODEL_FILE = Path("models/weather_only_solar_model.pkl")
 
 FORECAST_FILE = Path(
     "data/raw/bpdb/weather_forecast_24h.csv"

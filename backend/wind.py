@@ -1,10 +1,14 @@
 import sys
 import logging
 import concurrent.futures
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
 from fastapi import APIRouter, HTTPException
+
+from database.connection import get_session
+from database.models import AIPrediction
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +38,66 @@ router = APIRouter(
     prefix="/api/wind",
     tags=["Wind"]
 )
+
+
+# =========================================================
+# LOG AI PREDICTION TO POSTGRESQL
+# =========================================================
+
+def log_ai_prediction(
+    model_type: str,
+    zone: str,
+    predicted_mw: float,
+    features: dict = None,
+    model_version: str = None,
+) -> bool:
+
+    try:
+        session = get_session()
+        try:
+            now = datetime.now(timezone.utc)
+            existing = (
+                session.query(AIPrediction)
+                .filter(
+                    AIPrediction.model_type == model_type,
+                    AIPrediction.zone == zone,
+                    AIPrediction.timestamp >= now.replace(
+                        hour=0, minute=0, second=0,
+                        microsecond=0
+                    ),
+                )
+                .first()
+            )
+            if existing:
+                return False
+
+            prediction = AIPrediction(
+                timestamp=now,
+                model_type=model_type,
+                zone=zone,
+                predicted_mw=round(predicted_mw, 4),
+                features_json=features,
+                model_version=model_version,
+            )
+            session.add(prediction)
+            session.commit()
+            return True
+
+        except Exception as e:
+            session.rollback()
+            logger.warning(
+                "Failed to log AI prediction: %s", e
+            )
+            return False
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.warning(
+            "Database unavailable for AI prediction: %s", e
+        )
+        return False
 
 
 # =========================================================
@@ -246,6 +310,26 @@ def live_wind_forecast():
     # -----------------------------------------------------
 
     best_zone = ranking[0]
+
+
+    # -----------------------------------------------------
+    # LOG PREDICTIONS TO DATABASE
+    # -----------------------------------------------------
+
+    for item in ranking:
+        log_ai_prediction(
+            model_type="wind",
+            zone=item["zone"],
+            predicted_mw=item[
+                "expected_energy_mwh_per_1mw_24h"
+            ],
+            features={
+                "forecast_hours": 24,
+                "wind_height_m": 100,
+                "model": "wind_power_curve",
+            },
+            model_version="wind_power_curve_v1",
+        )
 
 
     # -----------------------------------------------------

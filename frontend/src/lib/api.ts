@@ -19,6 +19,10 @@ export const API_ENDPOINTS = {
   DEMAND_FORECAST: `${API_BASE}/api/demand/forecast`,
   NUCLEAR: `${API_BASE}/api/resources/nuclear`,
   HEALTH: `${API_BASE}/api/health`,
+  GRID_HISTORY: `${API_BASE}/api/grid/history`,
+  PREDICTIONS_HISTORY: `${API_BASE}/api/predictions/history`,
+  LOADSHIELD_HISTORY: `${API_BASE}/api/loadshield/history`,
+  MODELS: `${API_BASE}/api/models`,
 } as const;
 
 export interface ApiResult<T> {

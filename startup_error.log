@@ -1,0 +1,1246 @@
+2026-08-30 23:58:20,046 INFO backend.solar: Solar module OK
+2026-08-30 23:58:20,375 INFO powerflex: Solar model loaded successfully
+INFO:     Started server process [29208]
+INFO:     Waiting for application startup.
+2026-08-30 23:58:20,451 INFO powerflex: PowerFlex BD backend starting
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-08-31 00:03:31,256 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:03:31,258 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:03:32,372 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.113s
+2026-08-31 00:03:32,383 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:03:32,385 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:03:32,386 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:03:32,386 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:03:32,387 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:03:36,882 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 4.494s
+2026-08-31 00:03:36,883 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:03:36,883 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:03:36,884 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:03:41,137 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 4.253s
+2026-08-31 00:03:41,139 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:03:41,140 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:03:41,141 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:03:41,141 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:03:41,143 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:03:41,144 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:03:41,145 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:03:41,145 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:03:43,478 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:03:43,479 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:03:43,480 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:03:43,481 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:04:53,806 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:04:53,806 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:04:55,692 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.885s
+2026-08-31 00:04:55,693 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:04:55,693 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:04:55,694 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:04:55,694 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:04:55,695 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:04:55,695 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:04:55,696 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:04:55,697 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:04:55,698 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:04:55,698 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:04:55,700 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:04:55,700 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:04:55,701 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:04:55,701 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:04:57,291 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:04:57,292 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:04:57,294 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:04:57,295 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:06:14,503 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:06:14,504 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:06:15,626 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.120s
+2026-08-31 00:06:15,626 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:06:15,627 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:06:15,627 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:06:15,628 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:06:15,628 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:06:15,628 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:06:15,629 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:06:15,629 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:06:15,630 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:06:15,630 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:06:15,631 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:06:15,632 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:06:15,633 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:06:15,633 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:06:17,383 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:06:17,384 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:06:17,385 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:06:17,387 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:09:08,903 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:09:08,904 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:09:10,813 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.909s
+2026-08-31 00:09:10,815 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:09:10,816 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:09:10,817 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:09:10,818 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:09:10,819 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:09:15,396 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 4.576s
+2026-08-31 00:09:15,404 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:09:15,405 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:09:15,405 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:09:19,059 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 3.653s
+2026-08-31 00:09:19,061 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:09:19,062 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:09:19,063 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:09:19,063 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:09:19,065 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:09:19,066 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:09:19,067 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:09:19,068 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:09:20,515 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:09:20,516 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:09:20,518 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:09:20,519 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:10:14,621 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:10:14,622 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:10:15,704 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.081s
+2026-08-31 00:10:15,706 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:10:15,707 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:10:15,707 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:10:15,708 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:10:15,709 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:10:15,710 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:10:15,710 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:10:15,711 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:10:15,712 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:10:15,713 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:10:15,716 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:10:15,716 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:10:15,717 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:10:15,718 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:10:17,205 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:10:17,207 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:10:17,208 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:10:17,210 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:10:17,223 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:10:17,224 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:10:17,225 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:10:17,226 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:10:17,227 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:10:17,227 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:10:17,228 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:10:17,229 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:10:17,229 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:10:17,230 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:10:17,231 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:10:17,232 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:10:17,233 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:10:17,234 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:10:17,234 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:10:19,440 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:10:19,442 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:10:19,443 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:10:19,444 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:13:52,565 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:13:52,566 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:13:53,704 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.138s
+2026-08-31 00:13:53,706 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:13:53,707 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:13:53,708 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:13:53,708 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:13:53,708 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:13:53,709 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:13:53,709 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:13:53,710 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:13:53,711 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:13:53,711 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:13:53,713 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:13:53,713 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:13:53,714 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:13:53,715 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:13:55,130 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:13:55,132 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:13:55,133 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:13:55,136 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:14:35,308 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:14:35,309 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:14:35,310 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:14:35,310 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:14:35,311 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:14:35,312 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:14:39,163 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 3.851s
+2026-08-31 00:14:39,165 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:14:39,166 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:14:39,167 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:14:43,228 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 4.060s
+2026-08-31 00:14:43,229 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:14:43,229 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:14:43,230 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:14:43,230 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:14:43,232 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:14:43,233 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:14:43,234 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:14:43,235 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:14:44,683 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:14:44,684 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:14:44,685 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:14:44,687 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:16:05,362 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:16:05,363 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:16:06,554 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.191s
+2026-08-31 00:16:06,555 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:16:06,555 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:16:06,556 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:16:06,556 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:16:06,556 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:16:06,557 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:16:06,557 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:16:06,557 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:16:06,558 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:16:06,558 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:16:06,560 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:16:06,560 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:16:06,561 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:16:06,561 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:16:08,142 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:16:08,144 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:16:08,145 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:16:08,145 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:16:18,537 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:16:18,539 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:16:18,540 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:16:18,540 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:16:18,541 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:16:18,541 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:16:18,541 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:16:18,542 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:16:18,542 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:16:18,543 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:16:18,543 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:16:18,545 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:16:18,545 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:16:18,546 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:16:18,547 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:16:20,668 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:16:20,669 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:16:20,671 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:16:20,672 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:16:30,695 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:16:30,696 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:16:30,697 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:16:30,698 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:16:30,698 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:16:30,699 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:16:30,699 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:16:30,700 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:16:30,700 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:16:30,701 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:16:30,702 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:16:30,703 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:16:30,704 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:16:30,705 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:16:30,706 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:16:33,202 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:16:33,204 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:16:33,205 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:16:33,206 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:16:48,671 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:16:48,671 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:16:48,672 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:16:48,673 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:16:48,673 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:16:48,674 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:16:48,674 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:16:48,675 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:16:48,675 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:16:48,675 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:16:48,676 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:16:48,677 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:16:48,677 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:16:48,678 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:16:48,678 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:16:50,895 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:16:50,897 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:16:50,899 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:16:50,900 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:17:19,318 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:17:19,319 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:17:20,360 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.040s
+2026-08-31 00:17:20,362 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:17:20,362 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:17:20,363 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:17:20,363 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:17:20,363 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:17:20,364 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:17:20,364 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:17:20,365 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:17:20,365 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:17:20,366 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:17:20,367 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:17:20,367 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:17:20,368 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:17:20,368 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:17:21,965 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:17:21,966 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:17:21,968 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:17:21,969 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:21:57,896 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:21:57,901 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:21:57,902 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:21:57,910 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:22:00,990 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:22:01,220 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.321s
+2026-08-31 00:22:01,344 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.440s
+2026-08-31 00:22:01,411 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:22:01,427 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:22:01,444 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:22:01,459 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:22:01,461 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:22:01,495 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.581s
+2026-08-31 00:22:01,507 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:22:02,419 INFO backend.services.grid_service: [grid_service] Live fetch completed in 1.428s
+2026-08-31 00:22:02,420 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:22:07,358 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:22:07,374 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:22:07,375 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:22:07,376 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:22:07,378 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:22:07,379 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:22:07,393 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:22:08,843 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:22:12,728 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 11.206s
+2026-08-31 00:22:12,731 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:13,673 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 11.252s
+2026-08-31 00:22:13,675 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:13,696 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 12.207s
+2026-08-31 00:22:13,697 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:13,698 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:22:13,698 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:17,850 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:22:17,851 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:22:17,852 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:22:17,853 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:22:17,854 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:22:17,855 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:17,856 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:22:17,861 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:17,864 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:17,881 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:24,990 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 17.611s
+2026-08-31 00:22:24,991 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:24,992 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:22:24,992 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:26,059 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 17.214s
+2026-08-31 00:22:26,079 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:26,237 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 18.838s
+2026-08-31 00:22:26,283 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:22:27,718 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 14.987s
+2026-08-31 00:22:31,612 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 17.936s
+2026-08-31 00:22:32,533 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 18.834s
+2026-08-31 00:22:32,534 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:32,534 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:22:32,535 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:22:32,536 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:22:32,537 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:22:32,537 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:22:32,538 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:22:32,539 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:22:34,854 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:22:34,857 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:22:34,858 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:22:34,859 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:22:34,863 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:22:34,865 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:34,867 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:22:34,870 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:34,872 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:22:34,873 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:22:34,876 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:22:34,886 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:22:34,901 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:22:34,905 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:22:34,907 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:22:35,531 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 17.649s
+2026-08-31 00:22:35,535 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 17.659s
+2026-08-31 00:22:35,569 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 17.704s
+2026-08-31 00:22:35,570 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:35,577 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:22:35,585 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:22:35,587 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:22:35,589 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:22:35,590 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:22:35,590 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:22:35,591 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:22:36,239 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:22:36,241 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:22:36,244 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:22:36,246 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:22:36,246 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:22:36,247 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:36,250 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:22:36,251 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:36,252 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:22:36,253 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:22:36,255 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:22:36,257 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:22:36,257 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:22:36,258 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:22:36,260 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:22:38,021 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 13.028s
+2026-08-31 00:22:38,023 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:38,022 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:22:38,024 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:22:38,024 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:22:38,026 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:22:38,025 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:22:38,028 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:22:38,027 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:22:38,030 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:22:38,031 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:22:38,036 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:22:38,037 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:22:38,255 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:22:38,257 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:22:38,257 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:22:38,258 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:22:38,259 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:22:38,260 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:38,260 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:22:38,261 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:22:38,262 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:22:38,263 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:22:38,263 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:22:38,265 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:22:38,266 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:22:38,267 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:22:38,268 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:22:42,838 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:22:42,851 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:22:42,852 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:22:42,854 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:22:43,749 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 17.659s
+2026-08-31 00:22:44,111 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 17.828s
+2026-08-31 00:22:44,485 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:22:44,499 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:22:44,500 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:22:44,501 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:22:44,619 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:22:44,624 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:22:44,625 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:22:44,626 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:22:46,741 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:22:46,743 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:22:46,744 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:22:46,745 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:22:47,462 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:22:47,473 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:22:47,474 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:22:47,475 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:23:35,691 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:23:35,699 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:23:35,700 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:23:35,704 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:23:44,972 INFO backend.services.grid_service: [grid_service] Live fetch completed in 9.271s
+2026-08-31 00:23:44,974 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:23:44,975 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:23:44,977 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:23:44,978 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:23:44,979 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:44,981 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:23:44,983 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:44,983 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:23:44,984 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:23:44,985 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:23:44,986 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:23:44,988 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:23:44,991 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:23:44,992 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:23:45,192 INFO backend.services.grid_service: [grid_service] Live fetch completed in 9.486s
+2026-08-31 00:23:45,251 INFO backend.services.grid_service: [grid_service] Live fetch completed in 9.539s
+2026-08-31 00:23:46,817 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:23:46,819 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:23:46,821 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:23:46,822 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:23:47,846 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:23:47,848 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:23:47,851 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:23:47,852 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:23:47,852 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:23:47,860 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:47,864 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:23:47,865 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:47,870 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:23:47,873 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:23:47,881 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:23:47,887 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:23:47,898 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:23:47,904 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:23:47,905 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:23:48,217 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:23:48,233 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:23:48,249 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:23:48,250 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:23:48,265 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:23:48,281 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:48,297 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:23:48,312 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:48,313 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:23:48,330 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:23:48,344 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:23:48,361 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:23:48,373 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:23:48,390 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:23:48,424 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:23:49,702 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:23:49,734 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:23:50,083 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:23:50,233 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:23:50,247 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:23:50,263 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:50,281 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:23:50,475 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:50,503 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:23:50,545 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:23:50,578 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:23:50,688 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:23:50,717 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:23:50,739 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:23:50,848 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:23:54,254 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:23:54,256 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:23:54,257 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:23:54,258 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:23:54,258 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:23:54,259 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:54,260 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:23:54,262 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:23:54,266 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:23:54,267 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:23:54,268 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:23:54,270 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:23:54,379 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:23:54,381 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:23:54,399 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:24:03,797 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:24:04,086 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:24:04,424 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:24:04,582 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:24:04,609 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:24:04,623 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:24:04,767 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:24:04,788 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:24:04,969 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:24:05,004 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:24:05,017 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:24:05,176 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:24:05,245 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:24:05,276 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:24:05,330 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:24:10,395 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:24:10,414 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:24:10,591 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:24:10,694 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:24:10,706 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:24:10,731 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:24:10,753 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:24:10,767 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:24:10,778 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:24:10,806 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:24:10,938 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:24:10,969 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:24:10,970 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:24:10,971 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:24:10,971 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:24:12,408 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:24:12,442 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:24:12,443 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:24:12,582 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:24:12,595 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:24:12,655 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:24:12,656 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:24:13,313 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:24:13,538 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:24:13,566 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:24:13,616 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:24:14,306 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:24:14,489 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:24:14,585 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:24:14,936 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:24:14,995 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:24:15,005 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:24:15,192 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:24:15,257 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:24:16,757 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:24:16,768 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:24:16,804 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:24:17,053 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:24:19,468 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:24:19,470 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:24:19,471 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:24:19,474 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:24:19,635 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:24:19,637 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:24:19,638 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:24:19,639 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:24:26,341 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:24:26,384 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:24:26,477 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:24:26,492 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:24:26,966 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:24:26,977 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:24:26,978 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:24:26,979 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:24:27,824 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:24:27,827 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:24:27,829 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:24:27,830 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:24:48,499 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:24:48,500 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:24:48,547 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:24:48,550 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:24:52,513 INFO backend.services.grid_service: [grid_service] Live fetch completed in 4.013s
+2026-08-31 00:24:52,517 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:24:52,517 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:24:52,518 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:24:52,518 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:24:52,518 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:24:52,518 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:24:52,519 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:24:52,519 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:24:52,519 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:24:52,520 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:24:52,522 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:24:52,522 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:24:52,523 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:24:52,523 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:24:52,779 INFO backend.services.grid_service: [grid_service] Live fetch completed in 4.229s
+2026-08-31 00:24:52,790 INFO backend.services.grid_service: [grid_service] Live fetch completed in 4.237s
+2026-08-31 00:24:54,282 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:24:54,284 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:24:54,285 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:24:54,286 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:24:59,916 WARNING backend.solar: Skipping zone Mymensingh: HTTPSConnectionPool(host='api.open-meteo.com', port=443): Read timed out. (read timeout=30)
+2026-08-31 00:24:59,946 WARNING backend.solar: Skipping zone Sylhet: HTTPSConnectionPool(host='api.open-meteo.com', port=443): Read timed out. (read timeout=30)
+2026-08-31 00:25:00,151 WARNING backend.solar: Skipping zone Barishal: HTTPSConnectionPool(host='api.open-meteo.com', port=443): Read timed out. (read timeout=30)
+2026-08-31 00:25:00,196 WARNING backend.wind: Skipping zone Mymensingh: HTTPSConnectionPool(host='api.open-meteo.com', port=443): Read timed out. (read timeout=30)
+2026-08-31 00:25:00,226 WARNING backend.wind: Skipping zone Sylhet: HTTPSConnectionPool(host='api.open-meteo.com', port=443): Read timed out. (read timeout=30)
+2026-08-31 00:25:00,258 WARNING backend.solar: Skipping zone Rangpur: HTTPSConnectionPool(host='api.open-meteo.com', port=443): Read timed out. (read timeout=30)
+2026-08-31 00:25:00,400 WARNING backend.wind: Skipping zone Barishal: HTTPSConnectionPool(host='api.open-meteo.com', port=443): Read timed out. (read timeout=30)
+2026-08-31 00:25:00,431 WARNING backend.wind: Skipping zone Rangpur: HTTPSConnectionPool(host='api.open-meteo.com', port=443): Read timed out. (read timeout=30)
+2026-08-31 00:28:31,796 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:28:31,798 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:28:32,311 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:28:33,220 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:28:34,511 INFO backend.services.grid_service: [grid_service] Live fetch completed in 2.712s
+2026-08-31 00:28:34,515 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:28:34,525 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:28:34,540 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:28:34,555 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:28:34,572 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:28:34,691 INFO backend.services.grid_service: [grid_service] Live fetch completed in 2.378s
+2026-08-31 00:28:34,771 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:28:35,303 INFO backend.services.grid_service: [grid_service] Live fetch completed in 2.081s
+2026-08-31 00:28:36,001 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:28:41,134 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 6.547s
+2026-08-31 00:28:41,136 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:28:41,136 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:28:41,137 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:28:41,967 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 7.179s
+2026-08-31 00:28:41,969 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:28:41,978 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 5.976s
+2026-08-31 00:28:41,979 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:28:45,746 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 4.608s
+2026-08-31 00:28:45,747 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:28:45,748 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:28:45,749 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:28:45,749 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:28:45,751 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:28:45,752 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:28:45,752 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:28:45,753 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:28:47,248 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 5.279s
+2026-08-31 00:28:47,284 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 5.304s
+2026-08-31 00:28:47,600 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:28:47,603 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:28:47,604 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:28:47,605 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:36:35,396 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:36:35,410 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:36:35,417 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:36:35,420 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:36:38,958 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.537s
+2026-08-31 00:36:38,977 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.546s
+2026-08-31 00:36:38,993 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:36:39,172 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.747s
+2026-08-31 00:36:39,192 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:36:39,194 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:36:39,195 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:36:39,197 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:36:39,198 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:36:39,286 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:36:47,815 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 8.616s
+2026-08-31 00:36:47,820 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:36:47,821 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:36:47,822 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:36:47,852 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 8.565s
+2026-08-31 00:36:47,856 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:36:47,866 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 8.857s
+2026-08-31 00:36:47,875 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:36:54,813 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 6.990s
+2026-08-31 00:36:54,815 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:36:54,814 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 6.942s
+2026-08-31 00:36:54,814 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 6.939s
+2026-08-31 00:36:54,816 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:36:54,821 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:36:54,822 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:36:54,824 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:36:54,825 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:36:54,826 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:36:54,827 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:36:56,351 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:36:56,353 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:36:56,355 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:36:56,356 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:37:29,299 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:37:29,303 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:37:29,305 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:37:29,308 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:37:29,309 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:37:29,313 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:37:29,314 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:37:29,317 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:37:29,318 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:37:29,319 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:37:29,321 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:37:29,325 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:37:29,328 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:37:29,329 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:37:29,335 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:37:30,116 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:37:30,118 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:37:30,119 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:37:30,120 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:37:30,121 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:37:30,122 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:37:30,123 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:37:30,124 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:37:30,125 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:37:30,126 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:37:30,126 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:37:30,128 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:37:30,129 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:37:30,130 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:37:30,131 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:37:35,539 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:37:35,540 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:37:35,541 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:37:35,542 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:37:35,568 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:37:35,580 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:37:35,581 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:37:35,583 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:37:35,624 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:37:35,625 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:37:35,625 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:37:35,626 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:37:35,627 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:37:35,627 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:37:35,628 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:37:35,629 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:37:35,629 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:37:35,630 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:37:35,630 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:37:35,632 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:37:35,633 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:37:35,634 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:37:35,634 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:37:38,835 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:37:38,837 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:37:38,838 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:37:38,839 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:38:24,383 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:38:24,401 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:38:24,434 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:38:24,443 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:38:24,469 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:38:24,472 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:38:26,015 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:38:30,619 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:38:35,476 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:38:35,492 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:38:40,709 INFO backend.services.grid_service: [grid_service] Live fetch completed in 16.297s
+2026-08-31 00:38:40,738 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:38:40,753 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:38:40,768 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:38:40,797 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:38:41,034 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:38:41,047 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:38:41,108 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:38:41,118 INFO backend.services.grid_service: [grid_service] Live fetch completed in 16.674s
+2026-08-31 00:38:41,145 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:38:41,240 INFO backend.services.grid_service: [grid_service] Live fetch completed in 14.812s
+2026-08-31 00:38:41,372 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:38:41,613 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:38:41,641 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:38:41,656 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:38:41,661 INFO backend.services.grid_service: [grid_service] Live fetch completed in 17.224s
+2026-08-31 00:38:41,688 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:38:41,845 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:38:41,879 INFO backend.services.grid_service: [grid_service] Live fetch completed in 17.404s
+2026-08-31 00:38:41,990 INFO backend.services.grid_service: [grid_service] Live fetch completed in 17.520s
+2026-08-31 00:38:42,518 INFO backend.services.grid_service: [grid_service] Live fetch completed in 11.768s
+2026-08-31 00:38:43,235 INFO backend.services.grid_service: [grid_service] Live fetch completed in 7.710s
+2026-08-31 00:38:43,237 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:38:43,238 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:38:43,239 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:38:43,239 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:38:43,240 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:38:43,241 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:38:43,241 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:38:43,242 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:38:43,242 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:38:43,243 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:38:43,249 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:38:43,250 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:38:43,251 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:38:43,251 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:38:43,841 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:38:43,842 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:38:43,842 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:38:43,843 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:38:43,844 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:38:43,845 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:38:43,845 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:38:43,846 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:38:43,847 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:38:43,847 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:38:43,848 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:38:43,850 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:38:43,850 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:38:43,851 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:38:43,852 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:38:45,308 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:38:45,312 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:38:45,313 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:38:45,315 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:38:45,657 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:38:45,659 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:38:45,660 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:38:45,661 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:38:45,952 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:38:45,954 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:38:45,955 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:38:45,957 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:39:29,813 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:39:29,816 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:39:29,817 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:39:29,819 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:39:29,820 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:39:29,821 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:39:29,823 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:39:29,824 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:39:29,825 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:39:29,826 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:39:29,827 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:39:29,829 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:39:29,830 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:39:29,831 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:39:29,832 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:39:31,585 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:39:31,586 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:39:31,587 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:39:31,589 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:39:31,603 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:39:31,603 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:39:31,604 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:39:31,605 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:39:31,605 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:39:31,606 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:39:31,607 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:39:31,607 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:39:31,608 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:39:31,608 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:39:31,609 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:39:31,610 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:39:31,611 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:39:31,611 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:39:31,612 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:39:33,705 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:39:33,707 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:39:33,708 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:39:33,709 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:40:23,815 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:40:23,817 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:40:23,817 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:40:26,734 INFO backend.services.grid_service: [grid_service] Live fetch completed in 2.916s
+2026-08-31 00:40:26,736 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:40:26,737 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:40:26,738 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:40:26,738 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:40:26,739 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:40:26,739 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:40:26,740 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:40:26,741 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:40:26,741 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:40:26,742 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:40:26,744 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:40:26,745 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:40:26,745 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:40:26,746 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:40:26,864 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.045s
+2026-08-31 00:40:28,481 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:40:28,483 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:40:28,484 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:40:28,485 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:40:28,495 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:40:28,495 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:40:28,496 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:40:28,497 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:40:28,497 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:40:28,498 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:40:28,498 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:40:28,499 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:40:28,499 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:40:28,500 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:40:28,500 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:40:28,501 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:40:28,501 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:40:28,502 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:40:28,502 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:40:30,526 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:40:30,528 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:40:30,529 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:40:30,530 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:41:29,819 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:41:29,820 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:41:29,832 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:41:32,937 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.104s
+2026-08-31 00:41:33,025 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.205s
+2026-08-31 00:41:33,047 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:41:33,062 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:41:33,078 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:41:33,091 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:41:33,096 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:41:33,097 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:41:33,099 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:41:33,100 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:41:33,101 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:41:33,102 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:41:33,103 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:41:33,104 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:41:33,105 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:41:33,106 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:41:35,027 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:41:35,029 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:41:35,030 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:41:35,031 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:41:35,046 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:41:35,047 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:41:35,048 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:41:35,048 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:41:35,049 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:41:35,049 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:41:35,050 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:41:35,050 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:41:35,050 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:41:35,051 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:41:35,051 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:41:35,053 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:41:35,054 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:41:35,055 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:41:35,055 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:41:37,062 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:41:37,064 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:41:37,065 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:41:37,066 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:42:23,823 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:42:23,825 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:42:23,827 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:42:23,828 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:42:23,829 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:42:23,830 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:42:23,829 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:42:29,901 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:42:29,951 INFO backend.services.solar_service: [solar_service] Fetching fresh solar forecast
+2026-08-31 00:42:35,955 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 12.123s
+2026-08-31 00:42:35,977 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:42:35,981 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:42:36,072 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:42:36,098 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 12.266s
+2026-08-31 00:42:36,126 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:42:43,820 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:42:43,821 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:42:49,391 INFO backend.services.grid_service: [grid_service] Live fetch completed in 5.569s
+2026-08-31 00:42:49,400 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:42:49,403 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:42:49,404 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:42:49,405 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:42:49,416 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:42:49,418 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:42:49,432 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:42:49,628 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 19.676s
+2026-08-31 00:42:49,642 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:42:49,671 INFO backend.services.solar_service: [solar_service] Solar fetch completed in 19.767s
+2026-08-31 00:42:49,696 INFO backend.services.wind_service: [wind_service] Fetching fresh wind forecast
+2026-08-31 00:42:50,957 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 14.859s
+2026-08-31 00:42:50,959 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:42:50,959 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:42:50,960 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:42:50,961 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:42:50,962 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:42:50,963 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:42:50,964 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:42:50,964 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:42:51,642 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 15.515s
+2026-08-31 00:42:56,042 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:42:56,045 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:42:56,046 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:42:56,054 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:43:00,030 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 10.592s
+2026-08-31 00:43:00,031 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:43:00,032 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:43:00,032 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:43:00,033 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:43:00,035 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:43:00,036 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:43:00,037 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:43:00,037 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:43:00,295 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 10.651s
+2026-08-31 00:43:00,319 INFO backend.services.wind_service: [wind_service] Wind fetch completed in 10.620s
+2026-08-31 00:43:01,782 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:43:01,784 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:43:01,786 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:43:01,787 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:43:29,830 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:43:29,833 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:43:29,835 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:43:29,838 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:43:29,839 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:43:29,840 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:43:29,840 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:43:29,843 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:43:29,844 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:43:29,844 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:43:29,845 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:43:29,847 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:43:29,848 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:43:29,849 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:43:29,850 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:43:33,832 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:43:33,834 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:43:33,835 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:43:33,837 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:43:33,850 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:43:33,850 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:43:33,851 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:43:33,852 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:43:33,852 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:43:33,853 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:43:33,853 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:43:33,853 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:43:33,854 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:43:33,854 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:43:33,855 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:43:33,856 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:43:33,857 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:43:33,858 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:43:33,858 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:43:35,705 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:43:35,707 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:43:35,708 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:43:35,710 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:44:23,811 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:44:23,812 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:44:23,813 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:44:26,690 INFO backend.services.grid_service: [grid_service] Live fetch completed in 2.874s
+2026-08-31 00:44:26,695 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:44:26,696 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:44:26,716 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:44:26,732 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:44:26,745 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:44:26,751 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:44:26,750 INFO backend.services.grid_service: [grid_service] Live fetch completed in 2.936s
+2026-08-31 00:44:26,752 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:44:26,756 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:44:26,758 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:44:26,759 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:44:26,762 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:44:26,762 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:44:26,763 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:44:26,763 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:44:28,512 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:44:28,513 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:44:28,515 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:44:28,515 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:44:28,524 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:44:28,525 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:44:28,526 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:44:28,526 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:44:28,527 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:44:28,527 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:44:28,527 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:44:28,528 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:44:28,528 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:44:28,529 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:44:28,529 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:44:28,530 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:44:28,531 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:44:28,531 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:44:28,531 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:44:30,283 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:44:30,285 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:44:30,286 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:44:30,287 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:45:29,819 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:45:29,821 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:45:29,820 INFO backend.services.grid_service: [grid_service] Fetching fresh live grid data
+2026-08-31 00:45:33,580 INFO backend.services.grid_service: [grid_service] Live fetch completed in 3.756s
+2026-08-31 00:45:33,848 INFO backend.services.grid_service: [grid_service] Live fetch completed in 4.026s
+2026-08-31 00:45:33,859 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:45:33,865 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:45:33,870 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:45:33,871 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:45:33,873 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:33,874 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:45:33,875 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:33,876 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:45:33,877 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:45:33,877 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:45:33,879 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:45:33,880 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:45:33,881 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:45:33,882 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:45:35,938 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:45:35,940 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:45:35,941 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:45:35,943 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:45:35,957 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:45:35,958 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:45:35,958 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:45:35,959 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:45:35,960 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:45:35,960 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:35,961 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:45:35,962 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:35,962 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:45:35,963 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:45:35,963 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:45:35,965 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:45:35,965 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:45:35,966 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:45:35,966 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:45:38,299 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:45:38,301 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:45:38,302 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:45:38,304 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:45:41,212 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:45:41,227 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:45:41,233 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:45:41,235 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:45:41,249 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:45:41,250 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:41,253 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:45:41,254 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:41,254 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:45:41,262 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:45:41,266 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:45:41,270 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:45:41,270 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:45:41,272 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:45:41,273 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:45:46,467 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:45:46,471 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:45:46,472 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:45:46,474 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:45:46,487 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:45:46,488 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:45:46,489 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:45:46,489 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:45:46,490 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:45:46,490 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:46,491 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:45:46,491 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:46,491 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:45:46,492 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:45:46,492 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:45:46,494 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:45:46,495 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:45:46,496 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:45:46,496 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:45:50,834 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:45:50,835 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:45:50,836 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:45:50,838 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:45:55,192 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:45:55,195 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:45:55,196 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:45:55,196 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:45:55,197 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:45:55,198 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:55,199 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:45:55,199 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:45:55,200 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:45:55,201 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:45:55,201 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:45:55,203 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:45:55,206 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:45:55,209 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:45:55,210 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:45:57,805 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:45:57,806 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:45:57,807 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:45:57,808 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:46:13,357 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:46:13,362 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:46:13,364 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:46:13,367 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:46:13,372 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:46:13,374 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:46:13,376 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:46:13,378 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:46:13,380 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:46:13,381 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:46:13,384 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:46:13,387 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:46:13,390 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:46:13,406 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:46:13,409 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:46:13,464 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:46:13,467 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:46:13,470 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:46:13,487 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:46:13,489 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:46:13,491 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:46:13,494 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:46:13,496 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:46:13,498 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:46:13,500 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:46:13,503 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:46:13,504 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:46:13,505 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:46:13,506 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:46:13,506 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:46:24,779 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:46:24,781 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:46:24,782 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:46:24,784 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:46:24,805 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:46:24,808 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:46:24,810 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:46:24,811 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0
+2026-08-31 00:46:25,084 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid START
+2026-08-31 00:46:25,087 INFO powerflex.loadshield: LOADSHIELD_STAGE=grid SUCCESS connected=True live=True
+2026-08-31 00:46:25,088 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract START
+2026-08-31 00:46:25,089 INFO powerflex.loadshield: LOADSHIELD_STAGE=extract SUCCESS demand=16914.0 supply=14998.0 load_shed=1916.0
+2026-08-31 00:46:25,089 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar START
+2026-08-31 00:46:25,090 INFO powerflex.loadshield: LOADSHIELD_STAGE=solar SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:46:25,091 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind START
+2026-08-31 00:46:25,092 INFO powerflex.loadshield: LOADSHIELD_STAGE=wind SUCCESS keys=['project', 'resource', 'forecast_basis', 'data_source', 'forecast_hours']
+2026-08-31 00:46:25,093 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources START
+2026-08-31 00:46:25,094 INFO powerflex.loadshield: LOADSHIELD_STAGE=resources SUCCESS keys=['solar', 'wind', 'hydro', 'biomass', 'waste', 'gas', 'liquid_fuel', 'coal']
+2026-08-31 00:46:25,094 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass START
+2026-08-31 00:46:25,097 INFO powerflex.loadshield: LOADSHIELD_STAGE=biomass SUCCESS divisions=8
+2026-08-31 00:46:25,099 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste START
+2026-08-31 00:46:25,104 INFO powerflex.loadshield: LOADSHIELD_STAGE=waste SUCCESS zones=9
+2026-08-31 00:46:25,105 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast START
+2026-08-31 00:46:31,825 WARNING backend.solar: Skipping zone Barishal: 429 Client Error: Too Many Requests for url: https://api.open-meteo.com/v1/forecast?latitude=22.701&longitude=90.3535&hourly=temperature_2m%2Crelative_humidity_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m%2Cwind_direction_10m%2Cshortwave_radiation&forecast_hours=24&timezone=Asia%2FDhaka
+2026-08-31 00:46:32,292 INFO powerflex.loadshield: LOADSHIELD_STAGE=demand_forecast SUCCESS peak=17600.7
+2026-08-31 00:46:32,294 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer START demand=16914.0 supply=14998.0 deficit=1916.0
+2026-08-31 00:46:32,296 INFO powerflex.loadshield: LOADSHIELD_STAGE=optimizer SUCCESS status=DEFICIT_REMAINS remaining_gap=0.001
+2026-08-31 00:46:32,298 INFO powerflex.loadshield: LOADSHIELD_STAGE=response status=DEFICIT_REMAINS deficit=1916.0

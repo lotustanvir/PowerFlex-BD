@@ -43,7 +43,7 @@ export default function WasteToEnergy() {
           <h2 className="text-lg font-semibold text-white">Waste-to-Energy — Bangladesh Intelligence</h2>
           <DataBadge classification={data.data_classification || "OFFICIAL_PROJECT_DATA"} />
         </div>
-        <RefreshButton onClick={refresh} loading={loading} />
+        <RefreshButton onClick={refresh} loading={loading} variant="dark" />
       </div>
 
       {lastUpdated && (

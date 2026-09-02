@@ -1,17 +1,29 @@
 "use client";
 
+interface RefreshButtonProps {
+  onClick: () => void;
+  loading?: boolean;
+  variant?: "light" | "dark";
+}
+
 function RefreshButton({
   onClick,
   loading = false,
-}: {
-  onClick: () => void;
-  loading?: boolean;
-}) {
+  variant = "dark",
+}: RefreshButtonProps) {
+  const baseClasses =
+    "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+
+  const variantClasses =
+    variant === "dark"
+      ? "border border-slate-600 bg-slate-700 text-slate-200 hover:bg-slate-600"
+      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50";
+
   return (
     <button
       onClick={onClick}
       disabled={loading}
-      className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+      className={`${baseClasses} ${variantClasses}`}
     >
       <span
         className={`text-base leading-none ${loading ? "animate-spin" : ""}`}

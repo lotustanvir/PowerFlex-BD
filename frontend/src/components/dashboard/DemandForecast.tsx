@@ -56,7 +56,7 @@ export default function DemandForecast() {
             </span>
           )}
         </div>
-        <RefreshButton onClick={refresh} loading={loading} />
+        <RefreshButton onClick={refresh} loading={loading} variant="dark" />
       </div>
 
       {lastUpdated && (

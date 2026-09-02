@@ -53,3 +53,26 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Temporary / QA artifacts
+backend_stdout.txt
+backend_stderr.txt
+tmp_*.py
+qa-screenshots/
+qa-screenshots-*/
+qa-dashboard-verify.js
+qa-data-extraction.js
+qa-final-phase81.js
+qa-live-data-check.js
+qa-live-verification.js
+qa-network-errors.js
+qa-playwright-production.js
+check_ports.py
+package.json
+package-lock.json
+tests/browser-verify.js
+tests/capture-dashboard.js
+tests/capture-screenshots.js
+tests/debug-fetch.js
+tests/debug-js.js
+tests/__pycache__/

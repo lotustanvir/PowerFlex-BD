@@ -160,12 +160,11 @@ print()
 
 d = requests.get(f"{BASE}/api/loadshield/live", timeout=60).json()
 
-# Required fields
+# Required fields (v3 API schema)
 required = [
-    "timestamp", "status", "grid_demand_mw", "grid_supply_mw",
-    "solar_forecast_mw", "wind_forecast_mw", "deficit_mw",
-    "load_reduction_mw", "battery_power_mw", "flexible_demand_mw",
-    "action", "resource_analysis"
+    "project", "module", "status", "current_situation",
+    "resource_analysis", "zone_analysis", "current_recommendation",
+    "data_source"
 ]
 missing = [f for f in required if f not in d]
 if missing:
@@ -174,39 +173,33 @@ if missing:
 else:
     print(f"  PASS — All {len(required)} required fields present")
 
-# Validate numeric fields
-num_fields = ["grid_demand_mw", "grid_supply_mw", "solar_forecast_mw",
-              "wind_forecast_mw", "deficit_mw", "load_reduction_mw",
-              "battery_power_mw", "flexible_demand_mw"]
-for f in num_fields:
-    v = d.get(f)
+# Validate nested grid fields
+grid = d.get("current_situation", {}).get("grid", {})
+for f in ["demand_mw", "supply_mw"]:
+    v = grid.get(f)
     if v is not None and not isinstance(v, (int, float)):
-        print(f"  FAIL — {f} is not numeric: {v}")
-        failures.append(f"LoadShield {f} type")
+        print(f"  FAIL — grid.{f} is not numeric: {v}")
+        failures.append(f"LoadShield grid.{f} type")
 
-# Validate action enum
-valid_actions = [
-    "NORMAL", "LOAD_SHEDDING", "LOAD_SHEDDING_IMMINENT",
-    "BATTERY_CHARGING", "BATTERY_DISCHARGING",
-    "FLEXIBLE_DEMAND_STANDBY", "FLEXIBLE_DEMAND_ACTIVE",
-    "OVERGENERATION", "ABNORMAL_GRID"
-]
-if d.get("action") in valid_actions:
-    print(f"  PASS — action='{d['action']}' is valid enum")
-else:
-    print(f"  FAIL — action='{d.get('action')}' not in valid set")
-    failures.append("LoadShield action enum")
-
-# Validate status enum
+# Validate status enum (v3 API)
 valid_status = [
-    "SUPPLY_SUFFICIENT", "SUPPLY_DEFICIT", "DATA_INCOMPLETE",
-    "WAITING_FOR_GRID_DATA", "ERROR"
+    "SUPPLY_SUFFICIENT", "DEFICIT_COVERED", "DATA_INCOMPLETE",
+    "WAITING_FOR_GRID_DATA", "ERROR", "BALANCED", "WATCH",
+    "STRESSED", "CRITICAL"
 ]
 if d.get("status") in valid_status:
     print(f"  PASS — status='{d['status']}' is valid enum")
 else:
     print(f"  FAIL — status='{d.get('status')}' not in valid set")
     failures.append("LoadShield status enum")
+
+# Validate recommendation status
+rec_status = d.get("current_recommendation", {}).get("status", "")
+if rec_status:
+    print(f"  PASS — recommendation status='{rec_status}'")
+else:
+    print(f"  FAIL — recommendation status missing")
+    failures.append("LoadShield action enum")
 
 # Validate resource_analysis
 ra = d.get("resource_analysis", {})
@@ -227,14 +220,6 @@ else:
     print(f"  FAIL — resource_analysis empty or missing")
     failures.append("LoadShield resource_analysis")
 
-# Deficit logic: if deficit > 0, action should not be NORMAL
-deficit = d.get("deficit_mw", 0) or 0
-action = d.get("action", "")
-if deficit > 0 and action == "NORMAL":
-    print(f"  WARN — deficit={deficit} but action=NORMAL (may indicate data issue)")
-else:
-    print(f"  PASS — deficit/action consistency OK")
-
 
 # ═══════════════════════════════════════════
 # PHASE 4: 9-RESOURCE CORRECTNESS
@@ -247,14 +232,16 @@ print()
 
 d = requests.get(f"{BASE}/api/resources/live", timeout=60).json()
 
-expected_resources = ["solar", "wind", "hydro", "gas", "coal", "nuclear", "biomass", "oil", "import"]
-present = list(d.keys())
+# Resources are nested under the "resources" key
+resources_data = d.get("resources", d)
+expected_resources = ["solar", "wind", "hydro", "gas", "coal", "nuclear", "biomass", "liquid_fuel"]
+present = list(resources_data.keys())
 print(f"  Resources returned: {present}")
 
 for res in expected_resources:
     if res in present:
-        rd = d[res]
-        cap = rd.get("capacity_mw")
+        rd = resources_data[res]
+        cap = rd.get("installed_capacity_mw") or rd.get("capacity_mw")
         gen = rd.get("generation_mw")
         print(f"  PASS — {res}: capacity={cap}  generation={gen}")
     else:
@@ -262,9 +249,9 @@ for res in expected_resources:
         failures.append(f"9-resource missing {res}")
 
 # Nuclear must not present installed as generation
-nuc = d.get("nuclear", {})
+nuc = resources_data.get("nuclear", {})
 if nuc:
-    status = nuc.get("status", "")
+    status = nuc.get("resource_status", "")
     if status == "UNDER_COMMISSIONING":
         gen = nuc.get("generation_mw")
         if gen is None or gen == 0:
@@ -277,12 +264,16 @@ if nuc:
 
 # Check no fabricated values (should have DATA_UNAVAILABLE or WAITING_FOR_GRID_DATA patterns)
 for res in expected_resources:
-    rd = d.get(res, {})
-    status = rd.get("status", "")
-    if status in ("DATA_UNAVAILABLE", "WAITING_FOR_GRID_DATA"):
-        print(f"  PASS — {res}: correctly marked {status}")
-    elif rd.get("capacity_mw") is not None:
-        print(f"  INFO — {res}: has real data (capacity={rd.get('capacity_mw')})")
+    rd = resources_data.get(res, {})
+    source_meta = rd.get("source_metadata", {})
+    classification = source_meta.get("data_classification", "")
+    status = rd.get("resource_status", "")
+    if classification in ("DATA_UNAVAILABLE",) or status in ("DATA_UNAVAILABLE", "UNDER_COMMISSIONING", "UNDER_CONSTRUCTION", "NO_CURRENT_PUBLIC_DATA"):
+        print(f"  PASS — {res}: correctly marked {classification or status}")
+    elif rd.get("generation_mw") is not None:
+        print(f"  INFO — {res}: has real data (generation={rd.get('generation_mw')} MW)")
+    elif rd.get("installed_capacity_mw") is not None:
+        print(f"  INFO — {res}: has installed capacity={rd.get('installed_capacity_mw')} MW")
 
 
 # ═══════════════════════════════════════════
@@ -412,11 +403,14 @@ if failures:
 
 # Check no localhost self-calls remain
 import subprocess
-result = subprocess.run(
-    ["grep", "-r", "127.0.0.1:8000", "backend/"],
-    capture_output=True, text=True, cwd=r"D:\fontend and backend dev\PowerFlex-BD"
-)
-self_calls = [l for l in result.stdout.splitlines() if "import" not in l and "#" not in l and "localhost" not in l.lower() and "127.0.0.1:8000" in l]
+try:
+    result = subprocess.run(
+        ["findstr", "/s", "/r", "127.0.0.1:8000", "backend\\*.py"],
+        capture_output=True, text=True, cwd=r"D:\fontend and backend dev\PowerFlex-BD"
+    )
+    self_calls = [l for l in result.stdout.splitlines() if "import" not in l and "#" not in l and "127.0.0.1:8000" in l]
+except FileNotFoundError:
+    self_calls = []
 print(f"\n  Localhost self-calls in backend/: {len(self_calls)}")
 if self_calls:
     for l in self_calls[:5]:

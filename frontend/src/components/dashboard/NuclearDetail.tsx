@@ -42,7 +42,7 @@ export default function NuclearDetail() {
         <h2 className="text-lg font-semibold text-white">Nuclear — Rooppur Power Plant</h2>
         <div className="flex items-center gap-2">
           <DataBadge classification={resource.resource_status || "DATA_UNAVAILABLE"} />
-          <RefreshButton onClick={refresh} loading={loading} />
+          <RefreshButton onClick={refresh} loading={loading} variant="dark" />
         </div>
       </div>
 

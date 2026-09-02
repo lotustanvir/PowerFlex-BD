@@ -70,9 +70,9 @@ function ResourceCard({
       : item.source_metadata.data_classification;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4 transition-shadow hover:shadow-md">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-base font-semibold text-white">
           {RESOURCE_LABELS[resource] ?? resource}
         </h3>
         <DataBadge classification={classification} />
@@ -80,27 +80,27 @@ function ResourceCard({
 
       <dl className="space-y-2 text-sm">
         <div className="flex justify-between">
-          <dt className="text-gray-500">Generation</dt>
-          <dd className="font-medium text-gray-900">{generationDisplay}</dd>
+          <dt className="text-slate-400">Generation</dt>
+          <dd className="font-medium text-white">{generationDisplay}</dd>
         </div>
         <div className="flex justify-between">
-          <dt className="text-gray-500">Installed Capacity</dt>
-          <dd className="font-medium text-gray-900">{capacityDisplay}</dd>
+          <dt className="text-slate-400">Installed Capacity</dt>
+          <dd className="font-medium text-white">{capacityDisplay}</dd>
         </div>
         <div className="flex justify-between">
-          <dt className="text-gray-500">Status</dt>
-          <dd className="font-medium text-gray-900">{statusDisplay}</dd>
+          <dt className="text-slate-400">Status</dt>
+          <dd className="font-medium text-white">{statusDisplay}</dd>
         </div>
         <div className="flex justify-between">
-          <dt className="text-gray-500">Source</dt>
-          <dd className="font-medium text-gray-900">
+          <dt className="text-slate-400">Source</dt>
+          <dd className="font-medium text-white">
             {item.source_metadata.source || "N/A"}
           </dd>
         </div>
       </dl>
 
       {item.note && (
-        <p className="mt-3 rounded-md bg-gray-50 p-2 text-xs text-gray-600">
+        <p className="mt-3 rounded-md bg-slate-900/40 p-2 text-xs text-slate-400">
           {item.note}
         </p>
       )}
@@ -119,10 +119,10 @@ export default function AllResources() {
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-white">
             Bangladesh Electricity Resources
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-400">
             {data ? `${data.resource_count} resources tracked` : "Loading..."}
           </p>
         </div>
@@ -131,18 +131,18 @@ export default function AllResources() {
             live={!!data}
             lastUpdated={lastUpdated}
           />
-          <RefreshButton onClick={refresh} loading={loading} />
+          <RefreshButton onClick={refresh} loading={loading} variant="dark" />
         </div>
       </div>
 
       {error && !data && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950">
-          <p className="text-sm font-medium text-red-700 dark:text-red-300">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-sm font-medium text-red-400">
             Failed to load resources: {error}
           </p>
           <button
             onClick={refresh}
-            className="mt-2 text-sm font-medium text-red-600 underline hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+            className="mt-2 text-sm font-medium text-red-400 underline hover:text-red-300"
           >
             Retry
           </button>

@@ -21,12 +21,12 @@ function StatusIndicator({
           }`}
         />
       </span>
-      <span className="text-sm font-medium text-gray-700">
+      <span className="text-[10px] font-medium text-slate-400">
         {label ?? (live ? "LIVE" : "OFFLINE")}
       </span>
       {lastUpdated && (
-        <span className="text-xs text-gray-400">
-          Last updated: {lastUpdated.toLocaleTimeString()}
+        <span className="text-[10px] text-slate-600">
+          {lastUpdated.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Dhaka" })}
         </span>
       )}
     </div>

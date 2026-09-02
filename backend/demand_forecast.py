@@ -11,7 +11,8 @@ import requests
 from fastapi import APIRouter, HTTPException
 from pathlib import Path
 
-from backend.demand_history import count_records
+from backend.demand_history import count_records, count_unique_observations
+from backend.grid import fetch_with_timeout, PGCB_ENDPOINT_TIMEOUT
 from backend.services.grid_service import get_grid_live
 from database.connection import get_session
 from database.models import AIPrediction
@@ -30,9 +31,18 @@ logger = logging.getLogger("powerflex.demand_forecast")
 #   + Current PGCB demand as anchor
 #   + Temperature-based adjustment (Open-Meteo)
 #
-# IMPORTANT:
+# IMPORTANT DATA INTEGRITY RULES:
 #   - Current demand ALWAYS comes from PGCB (never faked)
 #   - Forecast is labeled "MODEL_FORECAST"
+#   - Training data is SYNTHETIC — based on published
+#     Bangladesh load research patterns, NOT actual
+#     historical demand curves from PGCB
+#   - The model is ANCHORED to real-time PGCB demand
+#     but the shape of the forecast comes from synthetic
+#     hourly profiles
+#   - This is an EXPERIMENTAL model. It should NOT be
+#     used as a production grid forecasting system
+#     without validation against real historical data
 #   - No hardcoded demand/supply values
 # =========================================================
 
@@ -183,9 +193,18 @@ def fetch_current_pgcb_demand() -> Optional[Dict[str, Any]]:
     """
     Get current demand from PGCB via internal grid service.
     NEVER fabricate this value.
+
+    Wrapped with endpoint-level timeout to prevent upstream
+    PGCB latency from blocking the demand forecast endpoint
+    for minutes.
     """
     try:
-        result = get_grid_live()
+        result = fetch_with_timeout(
+            get_grid_live,
+            timeout=PGCB_ENDPOINT_TIMEOUT,
+            default=None,
+            label="demand_forecast_grid",
+        )
 
         if result is None:
             return None
@@ -364,6 +383,11 @@ def generate_synthetic_training_data(
 # TRAIN DEMAND MODEL
 # =========================================================
 
+# Features for demand forecasting
+# NOTE: hourly_factor, seasonal_factor, weekend_factor are EXCLUDED
+# because they are direct multiplicative components of the synthetic
+# target formula, which would cause target leakage.
+# The model should learn these patterns from temporal features.
 FEATURE_COLUMNS = [
     "month",
     "hour",
@@ -371,9 +395,6 @@ FEATURE_COLUMNS = [
     "is_weekend",
     "is_summer",
     "is_winter",
-    "hourly_factor",
-    "seasonal_factor",
-    "weekend_factor",
     "temperature_c",
 ]
 
@@ -393,7 +414,21 @@ def train_demand_model(
     ):
         try:
             model = joblib.load(MODEL_FILE)
-            return model
+            # Validate feature schema compatibility
+            expected_features = len(FEATURE_COLUMNS)
+            if hasattr(model, "n_features_in_"):
+                actual_features = model.n_features_in_
+                if actual_features != expected_features:
+                    logger.warning(
+                        "Model feature schema mismatch: model has %d features, "
+                        "code expects %d (%s). Retraining.",
+                        actual_features, expected_features, FEATURE_COLUMNS,
+                    )
+                    # Fall through to retrain
+                else:
+                    return model
+            else:
+                return model
         except Exception:
             pass
 
@@ -520,11 +555,17 @@ def forecast_24h_demand(
             is_weekend,
             1 if is_summer else 0,
             1 if is_winter else 0,
-            hourly_factor,
-            seasonal_factor,
-            weekend_factor,
             temperature,
         ]])
+
+        # Validate feature schema before prediction
+        expected = len(FEATURE_COLUMNS)
+        actual = features.shape[1]
+        if actual != expected:
+            raise ValueError(
+                f"Feature schema mismatch: model expects {expected} "
+                f"features ({FEATURE_COLUMNS}), got {actual}"
+            )
 
         predicted_mw = float(model.predict(features)[0])
 
@@ -575,6 +616,16 @@ def forecast_24h_demand(
     }
 
 
+def _get_data_coverage_hours() -> float:
+    """Get data coverage in hours from demand history quality."""
+    try:
+        from backend.demand_history import get_demand_history_quality
+        quality = get_demand_history_quality()
+        return quality.get("time_coverage_hours", 0.0)
+    except Exception:
+        return 0.0
+
+
 # =========================================================
 # API ENDPOINT
 # =========================================================
@@ -623,34 +674,59 @@ def get_demand_forecast():
         "data_classification": "OFFICIAL_PGCB",
     }
 
-    real_records = count_records()
+    real_records = count_unique_observations()  # Independent observations only
+    raw_records = count_records()  # Total rows including duplicates
     threshold = 168
 
-    if real_records >= threshold:
-        training_data_type = "REAL_PGCB"
-        model_status = (
-            f"Ready for retraining with "
-            f"{real_records} real observations"
-        )
-    else:
-        training_data_type = "SYNTHETIC"
-        model_status = (
-            f"Using synthetic model. "
-            f"Need {threshold - real_records} more "
-            f"real PGCB observations for retraining "
-            f"(current: {real_records}/{threshold})"
-        )
-
+    # Use production gate to determine status
+    from backend.forecast_gate import (
+        build_demand_forecast_provenance,
+        ProductionGateChecker,
+        ForecastStatus,
+    )
+    
+    synthetic_records = 8760 if real_records < threshold else 0
+    
+    provenance = build_demand_forecast_provenance(
+        real_pgcb_records=real_records,
+        synthetic_records=synthetic_records,
+        model_name="XGBoost",
+    )
+    
+    # Honest status messaging
+    checker = ProductionGateChecker()
+    model_status = checker.get_honest_status_message(provenance)
+    
+    training_data_type = provenance.training_classification
+    
+    # Forecast availability and safety classification
+    forecast_available = not provenance.production_ready or provenance.forecast_status == ForecastStatus.PRODUCTION_READY
+    
     forecast["training_metadata"] = {
         "training_data_type": training_data_type,
-        "real_pgcb_records": real_records,
-        "synthetic_records": (
-            8760 if training_data_type == "SYNTHETIC"
-            else 0
-        ),
+        "real_pgcb_records": real_records,  # Independent observations
+        "raw_database_records": raw_records,  # Total rows including duplicates
+        "synthetic_records": synthetic_records,
         "threshold_for_retraining": threshold,
         "model_status": model_status,
         "data_classification": "MODEL_FORECAST",
+        "forecast_status": provenance.forecast_status,
+        "production_ready": provenance.production_ready,
+        "blocking_reasons": provenance.blocking_reasons,
+        "provenance": provenance.to_dict(),
+    }
+
+    # Top-level forecast metadata for frontend consumption
+    forecast["forecast_metadata"] = {
+        "forecast_available": True,  # Forecast IS generated, just not production-ready
+        "production_ready": provenance.production_ready,
+        "forecast_type": "MODEL_FORECAST",
+        "forecast_classification": provenance.forecast_status,
+        "observation_count": real_records,
+        "minimum_required_observations": threshold,
+        "data_coverage_hours": _get_data_coverage_hours(),
+        "training_data_synthetic": synthetic_records > 0,
+        "model_trained_on_synthetic": synthetic_records > 0,
     }
 
 

@@ -1,7 +1,7 @@
 import sys
 import logging
 import concurrent.futures
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import requests
@@ -11,6 +11,9 @@ from database.connection import get_session
 from database.models import AIPrediction
 
 logger = logging.getLogger(__name__)
+
+# Bangladesh Standard Time (UTC+6)
+BANGLADESH_TZ = timezone(timedelta(hours=6))
 
 
 # =========================================================
@@ -151,41 +154,61 @@ def live_wind_forecast():
             "timezone": "Asia/Dhaka",
             "wind_speed_unit": "kmh"
         }
-        response = requests.get(
-            url, params=params, timeout=30
+        # Retry logic with backoff (max 2 retries to fail fast on rate limits)
+        import time as _time
+        last_error = None
+        for attempt in range(2):
+            try:
+                response = requests.get(
+                    url, params=params, timeout=15
+                )
+                if response.status_code == 429:
+                    _time.sleep(1.0 * (attempt + 1))
+                    last_error = requests.HTTPError(
+                        f"429 Too Many Requests for {zone}"
+                    )
+                    continue
+                response.raise_for_status()
+                data = response.json()
+                hourly = data["hourly"]
+                rows = []
+                for i in range(len(hourly["time"])):
+                    rows.append({
+                        "zone": zone,
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "timestamp": hourly["time"][i],
+                        "wind_speed_10m_kmh":
+                            hourly["wind_speed_10m"][i],
+                        "wind_speed_80m_kmh":
+                            hourly["wind_speed_80m"][i],
+                        "wind_speed_100m_kmh":
+                            hourly["wind_speed_100m"][i],
+                        "wind_speed_120m_kmh":
+                            hourly["wind_speed_120m"][i],
+                        "wind_direction_10m_degree":
+                            hourly["wind_direction_10m"][i],
+                        "wind_direction_100m_degree":
+                            hourly["wind_direction_100m"][i],
+                        "wind_direction_120m_degree":
+                            hourly["wind_direction_120m"][i],
+                        "wind_gust_10m_kmh":
+                            hourly["wind_gusts_10m"][i],
+                        "temperature_c":
+                            hourly["temperature_2m"][i],
+                        "pressure_msl_hpa":
+                            hourly["pressure_msl"][i]
+                    })
+                return rows
+            except Exception as error:
+                last_error = error
+                if attempt < 1:
+                    _time.sleep(1.0 * (attempt + 1))
+                    continue
+                raise
+        raise last_error or RuntimeError(
+            f"All retries exhausted for wind zone {zone}"
         )
-        response.raise_for_status()
-        data = response.json()
-        hourly = data["hourly"]
-        rows = []
-        for i in range(len(hourly["time"])):
-            rows.append({
-                "zone": zone,
-                "latitude": latitude,
-                "longitude": longitude,
-                "timestamp": hourly["time"][i],
-                "wind_speed_10m_kmh":
-                    hourly["wind_speed_10m"][i],
-                "wind_speed_80m_kmh":
-                    hourly["wind_speed_80m"][i],
-                "wind_speed_100m_kmh":
-                    hourly["wind_speed_100m"][i],
-                "wind_speed_120m_kmh":
-                    hourly["wind_speed_120m"][i],
-                "wind_direction_10m_degree":
-                    hourly["wind_direction_10m"][i],
-                "wind_direction_100m_degree":
-                    hourly["wind_direction_100m"][i],
-                "wind_direction_120m_degree":
-                    hourly["wind_direction_120m"][i],
-                "wind_gust_10m_kmh":
-                    hourly["wind_gusts_10m"][i],
-                "temperature_c":
-                    hourly["temperature_2m"][i],
-                "pressure_msl_hpa":
-                    hourly["pressure_msl"][i]
-            })
-        return rows
 
     zone_results = {}
     with concurrent.futures.ThreadPoolExecutor(
@@ -214,10 +237,21 @@ def live_wind_forecast():
             all_rows.extend(zone_results[zone])
 
     if not all_rows:
-        raise HTTPException(
-            status_code=502,
-            detail="Weather API failed for all zones"
-        )
+        # Return structured DATA_UNAVAILABLE instead of 502
+        return {
+            "status": "DATA_UNAVAILABLE",
+            "resource": "wind",
+            "reason": "Weather provider unavailable for all zones",
+            "data_classification": "DATA_UNAVAILABLE",
+            "source": "open_meteo",
+            "classification": "DATA_UNAVAILABLE",
+            "zone_count": len(LOCATIONS),
+            "successful_zones": 0,
+            "forecast": [],
+            "zone_ranking": [],
+            "best_forecast_zone": None,
+            "best_opportunity": None,
+        }
 
 
     # -----------------------------------------------------
@@ -295,6 +329,25 @@ def live_wind_forecast():
 
 
     # -----------------------------------------------------
+    # CURRENT HOUR GENERATION
+    # -----------------------------------------------------
+
+    current_hour_bst = datetime.now(BANGLADESH_TZ).hour
+    current_hour_rows = [
+        row for row in all_rows
+        if datetime.fromisoformat(row["timestamp"]).hour == current_hour_bst
+    ]
+
+    if current_hour_rows:
+        current_generation_per_1mw = float(
+            current_hour_rows[0]["wind_generation_mw_per_1mw"]
+        )
+        current_hour_timestamp = current_hour_rows[0]["timestamp"]
+    else:
+        current_generation_per_1mw = 0.0
+        current_hour_timestamp = None
+
+    # -----------------------------------------------------
     # BEST HOURLY OPPORTUNITY
     # -----------------------------------------------------
 
@@ -339,10 +392,13 @@ def live_wind_forecast():
     return {
 
         "project":
-            "PowerFlex BD",
+            "PowerFlex BD v2.0",
 
         "resource":
             "Wind",
+
+        "module":
+            "Wind Power Curve Model",
 
         "forecast_basis":
             "100m wind speed",
@@ -350,8 +406,44 @@ def live_wind_forecast():
         "data_source":
             "Open-Meteo forecast + PowerFlex Wind Power Curve",
 
+        "data_classification":
+            "CALCULATED",
+
+        "classification_details": {
+            "weather_data": "LIVE_FEED (Open-Meteo API)",
+            "wind_generation": "CALCULATED (power curve lookup, not AI)",
+            "is_measured_generation": False,
+            "note": (
+                "These are engineering model estimates based on wind speed "
+                "and a simplified prototype turbine power curve. This is "
+                "NOT measured wind farm generation data."
+            ),
+        },
+
+        "methodology": {
+            "model": "Simplified prototype 1MW turbine power curve",
+            "wind_height_m": 100,
+            "cut_in_speed_kmh": 3.0,
+            "rated_speed_kmh": 12.0,
+            "cut_out_speed_kmh": 25.0,
+            "air_density_assumption": "Standard sea-level (1.225 kg/m³)",
+            "validation_status": "EXPERIMENTAL — not validated against real Bangladesh wind turbine data",
+        },
+
         "forecast_hours":
             24,
+
+        "current_hour_generation": {
+            "mw_per_1mw_installed": round(
+                current_generation_per_1mw, 4
+            ),
+            "timestamp": current_hour_timestamp,
+            "data_classification": "CALCULATED",
+            "note": (
+                "Hourly wind generation estimate for current hour "
+                "based on power curve model. Varies with wind speed."
+            ),
+        },
 
         "turbine_assumption": {
 

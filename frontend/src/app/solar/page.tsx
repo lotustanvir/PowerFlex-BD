@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "PowerFlex BD Solar AI — Bangladesh Solar Forecast & Zone Intelligence",
+  title: "PowerFlex BD Solar Forecast — Bangladesh Solar Energy Intelligence",
   description:
-    "AI-powered solar energy forecasting for Bangladesh. PowerFlex BD Solar AI analyzes weather data across 9 zones to predict solar generation potential, radiation levels, and optimal installation locations.",
+    "Weather-driven solar energy forecasting for Bangladesh. PowerFlex BD analyzes weather data across 9 zones to predict solar generation potential and rank zones by irradiance quality.",
   keywords: [
     "Bangladesh solar forecast",
     "solar energy potential Bangladesh",
     "solar zone ranking Bangladesh",
-    "AI solar prediction",
+    "solar prediction Bangladesh",
   ],
   alternates: { canonical: "/solar" },
 };
@@ -27,30 +27,44 @@ const ZONES = [
 
 const METHOD_STEPS = [
   { step: 1, title: "Weather Data Ingestion", description: "Open-Meteo API delivers hourly global horizontal irradiance (GHI), direct normal irradiance (DNI), diffuse horizontal irradiance (DHI), cloud cover, temperature, and humidity for every point across Bangladesh." },
-  { step: 2, title: "Solar Resource Mapping", description: "Raw irradiance data is spatially interpolated and averaged per zone to compute daily energy density maps and historical irradiance profiles." },
-  { step: 3, title: "ML Forecasting", description: "A gradient-boosted regression model trained on 5 years of historical solar output and weather patterns generates 7-day solar generation forecasts for each zone." },
-  { step: 4, title: "Zone Ranking", description: "Each zone is scored on a composite index of average GHI, forecast confidence, grid proximity, and land suitability — producing a ranked leaderboard." },
+  { step: 2, title: "Solar Resource Mapping", description: "Raw irradiance data is spatially interpolated and averaged per zone to compute daily energy density maps." },
+  { step: 3, title: "ML Forecasting", description: "A gradient-boosted regression model trained on SYNTHETIC targets derived from irradiance formulas generates solar generation estimates for each zone. This model is EXPERIMENTAL — not validated against real Bangladesh solar farm output." },
+  { step: 4, title: "Zone Ranking", description: "Each zone is ranked by predicted energy output per 1 MW installed capacity over a 24-hour forecast horizon." },
 ];
+
+function PotentialBadge({ potential }: { potential: string }) {
+  if (potential === "Very High") {
+    return <span className="rounded-full bg-emerald-500/12 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">{potential}</span>;
+  }
+  if (potential === "High") {
+    return <span className="rounded-full bg-amber-500/12 px-2.5 py-0.5 text-xs font-semibold text-amber-400">{potential}</span>;
+  }
+  return <span className="rounded-full bg-slate-500/12 px-2.5 py-0.5 text-xs font-semibold text-slate-400">{potential}</span>;
+}
 
 export default function SolarPage() {
   return (
-    <section className="space-y-12">
+    <div className="animate-fade-in space-y-10">
       {/* Hero */}
       <header className="space-y-4">
         <p className="text-sm font-semibold uppercase tracking-widest text-emerald-400">
-          Renewable Intelligence
+          Weather-Driven Solar Forecast
         </p>
         <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-          Solar AI — Bangladesh
+          Solar Forecast — Bangladesh
         </h1>
         <p className="max-w-2xl text-lg text-slate-300">
-          PowerFlex BD Solar AI delivers AI-powered solar energy forecasting
-          across Bangladesh&rsquo;s 9 administrative divisions. By fusing
-          real-time weather data with machine-learning models, it predicts
-          solar generation potential, identifies optimal installation sites,
-          and ranks zones by irradiance quality — giving policymakers,
-          developers, and utilities actionable intelligence.
+          PowerFlex BD provides weather-driven solar generation forecasts
+          across Bangladesh&rsquo;s 9 administrative divisions. Using
+          Open-Meteo weather data and a machine-learning model, it predicts
+          solar generation potential and ranks zones by irradiance quality.
         </p>
+        <div className="rounded-lg border border-amber-500/25 bg-amber-500/8 p-4 text-sm text-amber-400">
+          <strong>Experimental:</strong> The solar forecast model was trained
+          on synthetic targets derived from irradiance formulas, not real
+          Bangladesh solar farm output. Results should be treated as
+          estimates, not measurements.
+        </div>
       </header>
 
       {/* CTA */}
@@ -77,9 +91,9 @@ export default function SolarPage() {
           {METHOD_STEPS.map((item) => (
             <li
               key={item.step}
-              className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 space-y-2"
+              className="space-y-2 rounded-xl border border-slate-700/30 bg-slate-800/40 p-6"
             >
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600/20 text-sm font-bold text-emerald-400">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/12 text-sm font-bold text-emerald-400">
                 {item.step}
               </span>
               <h3 className="text-lg font-semibold text-white">{item.title}</h3>
@@ -97,34 +111,24 @@ export default function SolarPage() {
           independently assessed for solar irradiance, forecast confidence,
           and installation suitability.
         </p>
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-slate-700/30">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-800 bg-slate-900/80">
+            <thead className="border-b border-slate-700/60 bg-slate-900/80">
               <tr>
-                <th className="px-4 py-3 font-semibold text-slate-300">#</th>
-                <th className="px-4 py-3 font-semibold text-slate-300">Zone</th>
-                <th className="px-4 py-3 font-semibold text-slate-300">Avg GHI</th>
-                <th className="px-4 py-3 font-semibold text-slate-300">Potential</th>
+                <th className="px-4 py-3 font-semibold text-slate-400">#</th>
+                <th className="px-4 py-3 font-semibold text-slate-400">Zone</th>
+                <th className="px-4 py-3 font-semibold text-slate-400">Avg GHI</th>
+                <th className="px-4 py-3 font-semibold text-slate-400">Potential</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-slate-700/30">
               {ZONES.map((zone) => (
-                <tr key={zone.id} className="hover:bg-slate-800/40 transition-colors">
+                <tr key={zone.id} className="transition-colors hover:bg-slate-800/40">
                   <td className="px-4 py-3 text-slate-500">{zone.id}</td>
                   <td className="px-4 py-3 font-medium text-white">{zone.name}</td>
                   <td className="px-4 py-3 text-slate-300">{zone.avgGHI}</td>
                   <td className="px-4 py-3">
-                    <span
-                      className={
-                        zone.potential === "Very High"
-                          ? "rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-400"
-                          : zone.potential === "High"
-                            ? "rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-400"
-                            : "rounded-full bg-slate-500/20 px-2.5 py-0.5 text-xs font-semibold text-slate-400"
-                      }
-                    >
-                      {zone.potential}
-                    </span>
+                    <PotentialBadge potential={zone.potential} />
                   </td>
                 </tr>
               ))}
@@ -132,6 +136,6 @@ export default function SolarPage() {
           </table>
         </div>
       </article>
-    </section>
+    </div>
   );
 }

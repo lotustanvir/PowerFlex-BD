@@ -16,6 +16,7 @@ from backend.waste_calculator import (
     calculate_city_waste_potential,
     map_waste_to_zones,
 )
+from backend.services.cache import get_waste_cache
 
 
 # =========================================================
@@ -38,33 +39,10 @@ router = APIRouter(
 
 
 # =========================================================
-# CACHE
+# CACHE — uses shared services.cache (thread-safe, TTL-based)
 # =========================================================
 
-_cache: Dict[str, Any] = {}
-
-_cache_expiry = 3600
-
-
-def get_cached(key: str):
-    import time
-
-    entry = _cache.get(key)
-
-    if entry is None:
-        return None
-
-    ts, data = entry
-
-    if time.time() - ts > _cache_expiry:
-        return None
-
-    return data
-
-
-def set_cached(key: str, data: Any):
-    import time
-    _cache[key] = (time.time(), data)
+_cache = get_waste_cache()
 
 
 # =========================================================
@@ -79,7 +57,7 @@ def waste_live():
     + calculated potential.
     """
 
-    cached = get_cached("live")
+    cached = _cache.get("live")
 
     if cached is not None:
         return cached
@@ -133,7 +111,7 @@ def waste_live():
             "zone_allocation": zones,
         }
 
-        set_cached("live", response)
+        _cache.set("live", response)
 
         return response
 
@@ -158,7 +136,7 @@ def waste_projects():
     Return documented WtE projects in Bangladesh.
     """
 
-    cached = get_cached("projects")
+    cached = _cache.get("projects")
 
     if cached is not None:
         return cached
@@ -186,7 +164,7 @@ def waste_projects():
             ),
         }
 
-        set_cached("projects", response)
+        _cache.set("projects", response)
 
         return response
 
@@ -211,7 +189,7 @@ def waste_potential():
     for all cities.
     """
 
-    cached = get_cached("potential")
+    cached = _cache.get("potential")
 
     if cached is not None:
         return cached
@@ -231,7 +209,7 @@ def waste_potential():
                 cities["conversion_factors"],
         }
 
-        set_cached("potential", response)
+        _cache.set("potential", response)
 
         return response
 

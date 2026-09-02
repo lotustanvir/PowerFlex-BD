@@ -1,5 +1,12 @@
 from typing import Any, Dict
 
+from backend.prototype_config import (
+    SOLAR_INSTALLED_MW,
+    WIND_INSTALLED_MW,
+    BATTERY_POWER_MW,
+    FLEXIBLE_DEMAND_MW,
+)
+
 
 # =========================================================
 # POWERFLEX BD RESOURCE CONFIGURATION
@@ -31,17 +38,27 @@ from typing import Any, Dict
 
 RESOURCE_CONFIG = {
     "solar": {
-        "installed_capacity_mw": 1000.0,
+        "installed_capacity_mw": SOLAR_INSTALLED_MW,
         "dispatchable": False,
-        "source_type": "LIVE - AI forecast",
-        "data_classification": "LIVE",
+        "source_type": "FORECAST - weather-driven model",
+        "data_classification": "FORECAST",
+        "note": (
+            "Prototype scenario capacity. Actual installed solar in "
+            "Bangladesh is ~757 MW (BPDB/SREDA). Forecast outputs "
+            "are weather-driven model estimates, not measured generation."
+        ),
     },
 
     "wind": {
-        "installed_capacity_mw": 500.0,
+        "installed_capacity_mw": WIND_INSTALLED_MW,
         "dispatchable": False,
-        "source_type": "LIVE - AI forecast",
-        "data_classification": "LIVE",
+        "source_type": "CALCULATED - wind speed + power curve",
+        "data_classification": "CALCULATED",
+        "note": (
+            "Prototype scenario capacity. Actual installed wind in "
+            "Bangladesh is ~62 MW. Calculated outputs use a simplified "
+            "power curve model, not measured turbine generation."
+        ),
     },
 
     "hydro": {
@@ -81,7 +98,7 @@ RESOURCE_CONFIG = {
     },
 
     "battery": {
-        "power_capacity_mw": 500.0,
+        "power_capacity_mw": BATTERY_POWER_MW,
         "soc_percent": 80.0,
         "dispatchable": True,
         "source_type": "PROTOTYPE - configured storage",
@@ -93,7 +110,7 @@ RESOURCE_CONFIG = {
     },
 
     "flexible_demand": {
-        "capacity_mw": 500.0,
+        "capacity_mw": FLEXIBLE_DEMAND_MW,
         "dispatchable": True,
         "source_type": "PROTOTYPE - configured demand response",
         "data_classification": "PROTOTYPE",
@@ -332,8 +349,8 @@ def get_resource_availability(
             4,
         ),
         "data_classification": {
-            "solar": "LIVE",
-            "wind": "LIVE",
+            "solar": "FORECAST",
+            "wind": "CALCULATED",
             "hydro": "PROTOTYPE",
             "biomass": "PROTOTYPE",
             "waste": "PROTOTYPE",

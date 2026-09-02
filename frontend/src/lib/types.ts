@@ -55,6 +55,33 @@ export interface GridStatusResponse {
   message: string;
 }
 
+export interface GridRiskComponent {
+  name: string;
+  score: number;
+  weight: number;
+  detail: string;
+  raw_value: number;
+  unit: string;
+}
+
+export interface GridRiskScenario {
+  label: string;
+  risk_score: number;
+  risk_level: string;
+  demand_mw: number;
+  supply_mw: number;
+  gap_mw: number;
+}
+
+export interface GridRiskResponse {
+  composite_score: number;
+  risk_level: string;
+  components: GridRiskComponent[];
+  scenarios: Record<string, GridRiskScenario>;
+  timestamp: string;
+  data_sources: Record<string, string>;
+}
+
 export interface LoadShieldResponse {
   project: string;
   module: string;
@@ -84,6 +111,7 @@ export interface LoadShieldResponse {
     recommended_deployment: Deployment[];
   } | null;
   forecast_preparation: Record<string, unknown> | null;
+  grid_risk: GridRiskResponse | null;
   message: string;
   data_source: Record<string, string>;
 }
@@ -261,6 +289,18 @@ export interface WasteProject {
   source: string;
 }
 
+export interface ForecastMetadata {
+  forecast_available: boolean;
+  production_ready: boolean;
+  forecast_type: string;
+  forecast_classification: string;
+  observation_count: number;
+  minimum_required_observations: number;
+  data_coverage_hours: number;
+  training_data_synthetic: boolean;
+  model_trained_on_synthetic: boolean;
+}
+
 export interface DemandForecastResponse {
   current_pgcb_demand_mw: number;
   forecast_peak_mw: number;
@@ -278,6 +318,7 @@ export interface DemandForecastResponse {
     data_classification: string;
   };
   training_metadata: Record<string, unknown>;
+  forecast_metadata?: ForecastMetadata;
 }
 
 export interface HourlyForecast {
@@ -336,7 +377,6 @@ export interface PredictionHistoryItem {
   zone: string | null;
   predicted_mw: number | null;
   actual_mw: number | null;
-  features_json: Record<string, unknown> | null;
   model_version: string | null;
 }
 
@@ -391,4 +431,315 @@ export interface ModelRegistryResponse {
   limit: number;
   offset: number;
   data: ModelRegistryItem[];
+}
+
+// =========================================================
+// V3 API RESPONSES
+// =========================================================
+
+export interface WeatherDataPoint {
+  latitude: number;
+  longitude: number;
+  timestamp: string;
+  temperature_c: number | null;
+  humidity_percent: number | null;
+  wind_speed_kmh: number | null;
+  wind_direction_degree: number | null;
+  cloud_cover_percent: number | null;
+  precipitation_mm: number | null;
+  pressure_hpa: number | null;
+  solar_radiation_wm2: number | null;
+  source: string;
+  quality: string;
+}
+
+export interface WeatherResponse {
+  status: string;
+  data: WeatherDataPoint;
+  classification: string;
+  source: string;
+  retrieved_at: string;
+}
+
+export interface WeatherForecastResponse {
+  status: string;
+  data: {
+    latitude: number;
+    longitude: number;
+    timezone: string;
+    hourly: WeatherDataPoint[];
+    provider: string;
+    classification: string;
+    quality: string;
+    hour_count: number;
+  };
+  classification: string;
+}
+
+export interface LocationCandidate {
+  name: string;
+  latitude: number;
+  longitude: number;
+  technology: string;
+  grid_information: {
+    substation: string;
+    distance_km: number;
+    voltage_kv: number;
+    grid_proximity: string;
+  };
+}
+
+export interface LocationSearchResponse {
+  status: string;
+  search_center: { latitude: number; longitude: number } | null;
+  radius_km: number;
+  technology_filter: string | null;
+  candidate_count: number;
+  candidates: LocationCandidate[];
+  timestamp: string;
+}
+
+export interface SiteScore {
+  solar_score: number;
+  wind_score: number;
+  generation_score: number;
+  grid_score: number;
+  reliability_score: number;
+  overall_score: number;
+  components: Record<string, number>;
+  warnings: string[];
+}
+
+export interface LocationAnalysisResponse {
+  status: string;
+  location: { latitude: number; longitude: number };
+  technology: string;
+  capacity_mw: number;
+  grid_information: {
+    substation: string;
+    distance_km: number;
+    voltage_kv: number;
+    grid_proximity: string;
+  };
+  weather: WeatherDataPoint | null;
+  site_score: SiteScore;
+  expected_generation_mw: number | null;
+  analysis_timestamp: string;
+  classification: string;
+  disclaimer: string;
+}
+
+export interface DeficitAnalysis {
+  forecast_demand_mw: number | null;
+  forecast_supply_mw: number | null;
+  forecast_gap_mw: number | null;
+  gap_type: string;
+  severity: string;
+  confidence: number | null;
+  timestamp: string;
+  notes: string;
+}
+
+export interface DeficitResponse {
+  status: string;
+  analysis: DeficitAnalysis;
+  grid_status: string;
+  data_source: string;
+  classification: string;
+  timestamp: string;
+}
+
+export interface TechnologyRecommendation {
+  technology: string;
+  capacity_factor: number | null;
+  expected_generation_mw_per_mw: number | null;
+  suitability_score: number;
+  reasons: string[];
+  warnings: string[];
+}
+
+export interface TechnologyResponse {
+  status: string;
+  deficit_mw: number;
+  recommendation: TechnologyRecommendation;
+  classification: string;
+  timestamp: string;
+}
+
+export interface PlantRecommendation {
+  technology: string;
+  capacity_mw: number;
+  expected_generation_mw: number | null;
+  expected_daily_mwh: number | null;
+  expected_annual_gwh: number | null;
+  prediction_interval: { lower: number; upper: number } | null;
+  location: {
+    latitude: number;
+    longitude: number;
+    grid_information: Record<string, unknown>;
+    score: { overall_score: number };
+  };
+  reasons: string[];
+  warnings: string[];
+}
+
+export interface PlantResponse {
+  status: string;
+  recommendation: PlantRecommendation;
+  deficit_mw: number;
+  classification: string;
+  model: string;
+  timestamp: string;
+  disclaimer: string;
+}
+
+export interface FullRecommendation {
+  forecast_demand_mw: number | null;
+  forecast_supply_mw: number | null;
+  expected_deficit_mw: number | null;
+  recommended_technology: TechnologyRecommendation | null;
+  recommended_capacity_mw: number | null;
+  recommended_location: Record<string, unknown> | null;
+  expected_hourly_generation_mw: number | null;
+  expected_daily_energy_mwh: number | null;
+  expected_annual_energy_gwh: number | null;
+  prediction_interval: { lower: number; upper: number } | null;
+  site_score: number | null;
+  reasons: string[];
+  warnings: string[];
+  data_quality: string;
+  model_used: string;
+  timestamp: string;
+  disclaimer: string;
+}
+
+export interface FullRecommendationResponse {
+  status: string;
+  recommendation: FullRecommendation;
+  timestamp: string;
+}
+
+export interface DataSource {
+  source_id: string;
+  name: string;
+  organization: string;
+  source_type: string;
+  url: string | null;
+  access_method: string;
+  data_type: string;
+  update_frequency: string;
+  historical_coverage: string;
+  reliability: string;
+  license_notes: string;
+  classification: string;
+  status: string;
+  active: boolean;
+  last_success: string | null;
+  last_failure: string | null;
+  failure_count: number;
+  success_count: number;
+  description: string;
+  notes: string;
+}
+
+export interface SourcesResponse {
+  status: string;
+  sources: Record<string, DataSource>;
+  summary: {
+    total_sources: number;
+    active_sources: number;
+    verified_sources: number;
+    unverified_sources: number;
+    ml_models: number;
+    calculated: number;
+    classification_summary: Record<string, number>;
+  };
+  timestamp: string;
+}
+
+export interface TechnologyProfile {
+  capacity_factor: number;
+  intermittency: string;
+  weather_dependence: string;
+  scalability: string;
+  cost_trend: string;
+  reasons: string[];
+  warnings: string[];
+}
+
+export interface TechnologiesResponse {
+  status: string;
+  technologies: Record<string, TechnologyProfile>;
+  classification: string;
+}
+
+// Phase 6: Decision Support Types
+export interface RecommendationEvidence {
+  trigger: string;
+  current_value: number | null;
+  threshold: number | null;
+  source_data_classification: string | null;
+  source_type: string;
+  data_status: string;
+  data_freshness_seconds: number | null;
+  explanation: string;
+}
+
+export interface Recommendation {
+  type: string;
+  priority: string;
+  title: string;
+  summary: string;
+  detailed_explanation: string;
+  evidence: RecommendationEvidence;
+  expected_impact: string;
+  confidence: number;
+  timestamp: string;
+  deduplication_key: string;
+  expires_at: string | null;
+  metadata: Record<string, unknown>;
+}
+
+export interface DecisionSupportSystemInputs {
+  grid_demand_mw: number | null;
+  grid_supply_mw: number | null;
+  grid_status: string;
+  grid_data_classification: string;
+  grid_timestamp: string | null;
+  solar_generation_mw: number | null;
+  wind_generation_mw: number | null;
+  solar_data_classification: string;
+  wind_data_classification: string;
+  risk_score: number | null;
+  risk_level: string;
+  forecast_available: boolean;
+  forecast_peak_mw: number | null;
+  forecast_confidence: number | null;
+  independent_observations: number;
+  forecast_ready: boolean;
+  data_quality_issues: string[];
+  missing_inputs: string[];
+}
+
+export interface DecisionSupportResponse {
+  status: string;
+  timestamp: string;
+  system_inputs: DecisionSupportSystemInputs;
+  recommendations: Recommendation[];
+  total_recommendations: number;
+  missing_inputs: string[];
+  metadata: {
+    source_type: string;
+    data_status: string;
+    confidence_average: number;
+    forecast_available: boolean;
+    independent_observations: number;
+  };
+}
+
+export interface DecisionSupportHealthResponse {
+  independent_observations: number;
+  grid_status: string;
+  forecast_ready: boolean;
+  data_quality_score: number;
 }

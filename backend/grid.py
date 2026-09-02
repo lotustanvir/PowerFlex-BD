@@ -1,8 +1,10 @@
+import concurrent.futures
 import logging
 import os
 import re
-from datetime import datetime, timezone
-from typing import Optional
+import time
+from datetime import datetime, timedelta, timezone
+from typing import Any, Callable, Optional
 
 import requests
 from bs4 import BeautifulSoup
@@ -13,6 +15,177 @@ from database.connection import get_session
 from database.models import GridSnapshot
 
 logger = logging.getLogger("powerflex.grid")
+
+MAX_RESPONSE_BYTES = 5 * 1024 * 1024  # 5 MB
+PGCB_STALE_THRESHOLD_HOURS = 2
+
+# Endpoint-level timeout for PGCB operations (seconds).
+# Chosen to be shorter than the inner HTTP timeout (30s) so
+# the endpoint always returns within the budget, while still
+# allowing a single normal PGCB request (typically <10s) to
+# complete.  Under concurrent load this bounds the number of
+# temporary executor threads to N (concurrent requests).
+PGCB_ENDPOINT_TIMEOUT = 20
+
+
+# =========================================================
+# TIMEOUT HELPER
+# =========================================================
+
+def fetch_with_timeout(
+    func: Callable,
+    *args: Any,
+    timeout: int = PGCB_ENDPOINT_TIMEOUT,
+    default: Any = None,
+    label: str = "pgcb",
+    **kwargs: Any,
+) -> Any:
+    """Run *func* in a thread with a hard timeout.
+
+    Returns *default* on timeout or any exception so that
+    one slow upstream source never blocks the API server.
+
+    Uses ``pool.shutdown(wait=False)`` so that a timed-out
+    background thread never blocks the caller during cleanup.
+    The abandoned thread will exit naturally when its inner
+    HTTP timeout (30 s) expires.
+    """
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    try:
+        future = pool.submit(func, *args, **kwargs)
+        result = future.result(timeout=timeout)
+        logger.info("FETCH_OK label=%s", label)
+        return result
+    except concurrent.futures.TimeoutError:
+        logger.warning(
+            "FETCH_TIMEOUT label=%s timeout=%ss", label, timeout,
+        )
+        return default
+    except Exception:
+        logger.exception("FETCH_FAILED label=%s", label)
+        return default
+    finally:
+        pool.shutdown(wait=False)
+
+
+# =========================================================
+# PGCB RESPONSE VALIDATION
+# =========================================================
+
+def validate_pgcb_response(
+    response: requests.Response,
+) -> Optional[str]:
+    """Validate a PGCB HTTP response. Returns error message or None if valid."""
+    if response.status_code != 200:
+        return f"Unexpected status code: {response.status_code}"
+
+    content_type = response.headers.get("Content-Type", "")
+    if "html" not in content_type.lower():
+        return f"Unexpected Content-Type: {content_type}"
+
+    content_length = response.headers.get("Content-Length")
+    if content_length and int(content_length) > MAX_RESPONSE_BYTES:
+        return f"Response too large: {content_length} bytes"
+
+    if len(response.content) > MAX_RESPONSE_BYTES:
+        return f"Response body exceeds 5 MB limit"
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    table = soup.find("table")
+    if table is None:
+        return "HTML does not contain expected table structure"
+
+    return None
+
+
+# =========================================================
+# STALE DATA DETECTION
+# =========================================================
+
+def detect_stale_data(timestamp_str: str) -> bool:
+    """Return True if PGCB timestamp is older than 2 hours."""
+    if not timestamp_str:
+        return False
+
+    cleaned = translate_bangla_digits(str(timestamp_str))
+    for fmt in [
+        "%Y-%m-%dT%H:%M:%S%z",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d %H:%M:%S",
+        "%d-%m-%Y %H:%M:%S",
+        "%d-%m-%Y %H:%M",
+        "%d/%m/%Y %H:%M:%S",
+        "%d/%m/%Y %H:%M",
+        "%Y-%m-%d %H:%M",
+    ]:
+        try:
+            dt = datetime.strptime(cleaned, fmt)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            age = datetime.now(timezone.utc) - dt
+            return age > timedelta(hours=PGCB_STALE_THRESHOLD_HOURS)
+        except ValueError:
+            continue
+
+    return False
+
+
+# =========================================================
+# RETRY HELPER
+# =========================================================
+
+def _fetch_with_retry(
+    url: str,
+    max_retries: int = 3,
+    timeout: int = 30,
+    **kwargs,
+) -> requests.Response:
+    """Fetch URL with exponential backoff on network errors."""
+    import os
+    import urllib3
+
+    # SSL verification enabled by default; allow explicit override via env var
+    # for development environments with self-signed or broken server certificates.
+    ssl_verify = os.getenv("GRID_SSL_VERIFY", "true").lower() != "false"
+    if not ssl_verify:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        logger.warning(
+            "SSL verification disabled for %s via GRID_SSL_VERIFY=false. "
+            "This is insecure and should NOT be used in production.",
+            url,
+        )
+
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(
+                url,
+                timeout=timeout,
+                verify=ssl_verify,
+                **kwargs,
+            )
+            return response
+        except requests.ConnectionError as e:
+            last_error = e
+            wait = 2 ** attempt
+            logger.warning(
+                "Connection error on attempt %d/%d for %s, retrying in %ds",
+                attempt + 1, max_retries, url, wait,
+            )
+            time.sleep(wait)
+        except requests.Timeout as e:
+            last_error = e
+            wait = 2 ** attempt
+            logger.warning(
+                "Timeout on attempt %d/%d for %s, retrying in %ds",
+                attempt + 1, max_retries, url, wait,
+            )
+            time.sleep(wait)
+        except requests.RequestException as e:
+            logger.error("Non-retryable request error for %s: %s", url, e)
+            raise
+
+    raise last_error
 
 
 # =========================================================
@@ -31,8 +204,8 @@ router = APIRouter(
 
 def log_grid_snapshot(
     timestamp: str,
-    demand_mw: float,
-    supply_mw: float,
+    demand_mw: float = None,
+    supply_mw: float = None,
     load_shedding_mw: float = None,
     gas_mw: float = None,
     liquid_fuel_mw: float = None,
@@ -45,6 +218,8 @@ def log_grid_snapshot(
     grid_status: str = None,
     risk_level: str = None,
     raw_html: str = None,
+    source: str = "PGCB_ERP",
+    data_classification: str = "OFFICIAL_PGCB",
 ) -> bool:
 
     try:
@@ -84,6 +259,8 @@ def log_grid_snapshot(
                 if import_mw else None,
                 grid_status=grid_status,
                 risk_level=risk_level,
+                source=source,
+                data_classification=data_classification,
                 raw_html=raw_html,
             )
             session.add(snapshot)
@@ -173,7 +350,15 @@ def parse_pgcb_timestamp(
     date_str: str,
     time_str: str,
 ) -> str:
-
+    """Parse PGCB timestamp.
+    
+    IMPORTANT: PGCB ERP serves Bangladesh Standard Time (BST, UTC+6).
+    We parse the datetime and stamp it as BST, then convert to UTC for storage.
+    """
+    from datetime import timedelta
+    
+    BST = timezone(timedelta(hours=6))
+    
     combined = f"{date_str} {time_str}"
     combined = translate_bangla_digits(combined)
 
@@ -191,10 +376,14 @@ def parse_pgcb_timestamp(
         try:
 
             dt = datetime.strptime(combined, fmt)
-
-            return dt.replace(
-                tzinfo=timezone.utc,
-            ).isoformat()
+            
+            # PGCB timestamps are in Bangladesh Standard Time (UTC+6)
+            dt_bst = dt.replace(tzinfo=BST)
+            
+            # Convert to UTC for storage
+            dt_utc = dt_bst.astimezone(timezone.utc)
+            
+            return dt_utc.isoformat()
 
         except ValueError:
 
@@ -234,22 +423,34 @@ def fetch_pgcb_generation() -> dict:
       Nepal, Remarks
     """
 
-    import urllib3
-    urllib3.disable_warnings(
-        urllib3.exceptions.InsecureRequestWarning
-    )
-
     try:
 
-        response = requests.get(
-            PGCB_GENERATION_URL,
-            timeout=30,
-            headers={
-                "User-Agent": "PowerFlex-BD/1.0",
-                "Accept": "text/html",
-            },
-            verify=False,
-        )
+        try:
+            response = _fetch_with_retry(
+                PGCB_GENERATION_URL,
+                headers={
+                    "User-Agent": "PowerFlex-BD/1.0",
+                    "Accept": "text/html",
+                },
+            )
+        except (requests.ConnectionError, requests.Timeout) as error:
+            return {
+                "connected": False,
+                "source": "PGCB_GENERATION",
+                "status": "NETWORK_ERROR",
+                "message": f"Retry exhausted: {error}",
+                "data": None,
+            }
+
+        validation_error = validate_pgcb_response(response)
+        if validation_error:
+            return {
+                "connected": False,
+                "source": "PGCB_GENERATION",
+                "status": "PARSE_ERROR",
+                "message": validation_error,
+                "data": None,
+            }
 
         response.raise_for_status()
 
@@ -374,6 +575,13 @@ def fetch_pgcb_generation() -> dict:
             row["Time"],
         )
 
+        stale = detect_stale_data(timestamp)
+        if stale:
+            logger.warning(
+                "PGCB generation data is stale (>2h old): %s",
+                timestamp,
+            )
+
         return {
             "connected": True,
             "source": "PGCB_GENERATION",
@@ -381,6 +589,7 @@ def fetch_pgcb_generation() -> dict:
             "data": {
                 "timestamp": timestamp,
                 "current_generation_mw": generation_mw,
+                "stale": stale,
                 "generation_breakdown": {
                     "gas_mw": gas_mw,
                     "liquid_fuel_mw": liquid_fuel_mw,
@@ -439,22 +648,34 @@ def fetch_pgcb_demand_supply() -> dict:
     from PGCB official systems.
     """
 
-    import urllib3
-    urllib3.disable_warnings(
-        urllib3.exceptions.InsecureRequestWarning
-    )
-
     try:
 
-        response = requests.get(
-            PGCB_DEMAND_SUPPLY_URL,
-            timeout=30,
-            headers={
-                "User-Agent": "PowerFlex-BD/1.0",
-                "Accept": "text/html",
-            },
-            verify=False,
-        )
+        try:
+            response = _fetch_with_retry(
+                PGCB_DEMAND_SUPPLY_URL,
+                headers={
+                    "User-Agent": "PowerFlex-BD/1.0",
+                    "Accept": "text/html",
+                },
+            )
+        except (requests.ConnectionError, requests.Timeout) as error:
+            return {
+                "connected": False,
+                "source": "PGCB_DEMAND_SUPPLY",
+                "status": "NETWORK_ERROR",
+                "message": f"Retry exhausted: {error}",
+                "data": None,
+            }
+
+        validation_error = validate_pgcb_response(response)
+        if validation_error:
+            return {
+                "connected": False,
+                "source": "PGCB_DEMAND_SUPPLY",
+                "status": "PARSE_ERROR",
+                "message": validation_error,
+                "data": None,
+            }
 
         response.raise_for_status()
 
@@ -553,6 +774,13 @@ def fetch_pgcb_demand_supply() -> dict:
             row["Time"],
         )
 
+        stale = detect_stale_data(timestamp)
+        if stale:
+            logger.warning(
+                "PGCB demand/supply data is stale (>2h old): %s",
+                timestamp,
+            )
+
         return {
             "connected": True,
             "source": "PGCB_DEMAND_SUPPLY",
@@ -563,6 +791,7 @@ def fetch_pgcb_demand_supply() -> dict:
                 "current_supply_mw": supply_mw,
                 "deficit_mw": deficit_mw,
                 "load_shedding_mw": load_shed_mw,
+                "stale": stale,
                 "remarks": row.get("Remarks", ""),
             },
         }
@@ -830,15 +1059,28 @@ def official_pgcb_data():
     demand/supply/load-shed data.
     """
 
-    result = fetch_pgcb_demand_supply()
+    result = fetch_with_timeout(
+        fetch_pgcb_demand_supply,
+        timeout=PGCB_ENDPOINT_TIMEOUT,
+        default=None,
+        label="grid_official",
+    )
 
-    if not result["connected"]:
+    if result is None or not result["connected"]:
 
         return {
             "project": "PowerFlex BD",
-            "status": result["status"],
+            "status": (
+                result["status"]
+                if result is not None
+                else "PGCB_TIMEOUT"
+            ),
             "live": False,
-            "message": result["message"],
+            "message": (
+                result["message"]
+                if result is not None
+                else "PGCB upstream timed out"
+            ),
             "data": None,
         }
 
@@ -893,9 +1135,14 @@ def live_grid():
     load-shedding, and generation breakdown.
     """
 
-    pgcb = fetch_pgcb_grid_data()
+    pgcb = fetch_with_timeout(
+        fetch_pgcb_grid_data,
+        timeout=PGCB_ENDPOINT_TIMEOUT,
+        default=None,
+        label="grid_live",
+    )
 
-    if not pgcb["connected"]:
+    if pgcb is None or not pgcb["connected"]:
 
         return {
             "project": "PowerFlex BD",
@@ -903,7 +1150,11 @@ def live_grid():
             "status": "PGCB_ADAPTER_READY",
             "data_source": "PGCB / NLDC",
             "live": False,
-            "message": pgcb["message"],
+            "message": (
+                pgcb["message"]
+                if pgcb is not None
+                else "PGCB upstream timed out"
+            ),
             "grid_snapshot": None,
         }
 
@@ -913,36 +1164,8 @@ def live_grid():
     supply = grid["supply_mw"]
     load_shed = grid["load_shedding_mw"]
 
-    log_pgcb_observation(
-        pgcb_timestamp=grid.get("timestamp", ""),
-        demand_mw=demand,
-        supply_mw=supply,
-        load_shedding_mw=load_shed,
-        deficit_mw=grid.get(
-            "demand_supply_gap_mw", 0.0
-        ),
-        source="PGCB_ERP",
-    )
-
     generation = grid.get("generation_breakdown", {})
     imports = grid.get("imports", {})
-
-    log_grid_snapshot(
-        timestamp=grid.get("timestamp", ""),
-        demand_mw=demand,
-        supply_mw=supply,
-        load_shedding_mw=load_shed,
-        gas_mw=generation.get("gas_mw"),
-        liquid_fuel_mw=generation.get("liquid_fuel_mw"),
-        coal_mw=generation.get("coal_mw"),
-        hydro_mw=generation.get("hydro_mw"),
-        solar_mw=generation.get("solar_mw"),
-        wind_mw=generation.get("wind_mw"),
-        hvdc_mw=imports.get("india_bheramara_hvdc_mw"),
-        import_mw=imports.get("total_imports_mw"),
-        grid_status=grid_status,
-        risk_level=risk_level,
-    )
 
     if demand is not None and supply is not None:
 
@@ -968,6 +1191,34 @@ def live_grid():
 
         grid_status = "DATA_INCOMPLETE"
         risk_level = "UNKNOWN"
+
+    log_pgcb_observation(
+        pgcb_timestamp=grid.get("timestamp", ""),
+        demand_mw=demand,
+        supply_mw=supply,
+        load_shedding_mw=load_shed,
+        deficit_mw=grid.get(
+            "demand_supply_gap_mw", 0.0
+        ),
+        source="PGCB_ERP",
+    )
+
+    log_grid_snapshot(
+        timestamp=grid.get("timestamp", ""),
+        demand_mw=demand,
+        supply_mw=supply,
+        load_shedding_mw=load_shed,
+        gas_mw=generation.get("gas_mw"),
+        liquid_fuel_mw=generation.get("liquid_fuel_mw"),
+        coal_mw=generation.get("coal_mw"),
+        hydro_mw=generation.get("hydro_mw"),
+        solar_mw=generation.get("solar_mw"),
+        wind_mw=generation.get("wind_mw"),
+        hvdc_mw=imports.get("india_bheramara_hvdc_mw"),
+        import_mw=imports.get("total_imports_mw"),
+        grid_status=grid_status,
+        risk_level=risk_level,
+    )
 
     return {
         "project": "PowerFlex BD",

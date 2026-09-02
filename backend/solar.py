@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 import joblib
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 
@@ -13,6 +13,9 @@ from database.connection import get_session
 from database.models import AIPrediction
 
 logger = logging.getLogger(__name__)
+
+# Bangladesh Standard Time (UTC+6)
+BANGLADESH_TZ = timezone(timedelta(hours=6))
 
 
 # =========================================================
@@ -189,35 +192,55 @@ def live_solar_forecast():
             "forecast_hours": 24,
             "timezone": "Asia/Dhaka"
         }
-        response = requests.get(
-            url, params=params, timeout=30
+        # Retry logic with backoff (max 2 retries to fail fast on rate limits)
+        import time as _time
+        last_error = None
+        for attempt in range(2):
+            try:
+                response = requests.get(
+                    url, params=params, timeout=15
+                )
+                if response.status_code == 429:
+                    _time.sleep(1.0 * (attempt + 1))
+                    last_error = requests.HTTPError(
+                        f"429 Too Many Requests for {zone}"
+                    )
+                    continue
+                response.raise_for_status()
+                data = response.json()
+                hourly = data["hourly"]
+                rows = []
+                for i in range(len(hourly["time"])):
+                    rows.append({
+                        "zone": zone,
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "timestamp": hourly["time"][i],
+                        "temperature_c":
+                            hourly["temperature_2m"][i],
+                        "humidity_percent":
+                            hourly["relative_humidity_2m"][i],
+                        "precipitation_mm":
+                            hourly["precipitation"][i],
+                        "cloud_cover_percent":
+                            hourly["cloud_cover"][i],
+                        "wind_speed_kmh":
+                            hourly["wind_speed_10m"][i],
+                        "wind_direction_degree":
+                            hourly["wind_direction_10m"][i],
+                        "solar_radiation_wm2":
+                            hourly["shortwave_radiation"][i]
+                    })
+                return rows
+            except Exception as error:
+                last_error = error
+                if attempt < 1:
+                    _time.sleep(1.0 * (attempt + 1))
+                    continue
+                raise
+        raise last_error or RuntimeError(
+            f"All retries exhausted for solar zone {zone}"
         )
-        response.raise_for_status()
-        data = response.json()
-        hourly = data["hourly"]
-        rows = []
-        for i in range(len(hourly["time"])):
-            rows.append({
-                "zone": zone,
-                "latitude": latitude,
-                "longitude": longitude,
-                "timestamp": hourly["time"][i],
-                "temperature_c":
-                    hourly["temperature_2m"][i],
-                "humidity_percent":
-                    hourly["relative_humidity_2m"][i],
-                "precipitation_mm":
-                    hourly["precipitation"][i],
-                "cloud_cover_percent":
-                    hourly["cloud_cover"][i],
-                "wind_speed_kmh":
-                    hourly["wind_speed_10m"][i],
-                "wind_direction_degree":
-                    hourly["wind_direction_10m"][i],
-                "solar_radiation_wm2":
-                    hourly["shortwave_radiation"][i]
-            })
-        return rows
 
     zone_results = {}
     with concurrent.futures.ThreadPoolExecutor(
@@ -246,10 +269,21 @@ def live_solar_forecast():
             all_rows.extend(zone_results[zone])
 
     if not all_rows:
-        raise HTTPException(
-            status_code=502,
-            detail="Weather API failed for all zones"
-        )
+        # Return structured DATA_UNAVAILABLE instead of 502
+        return {
+            "status": "DATA_UNAVAILABLE",
+            "resource": "solar",
+            "reason": "Weather provider unavailable for all zones",
+            "data_classification": "DATA_UNAVAILABLE",
+            "source": "open_meteo",
+            "classification": "DATA_UNAVAILABLE",
+            "zone_count": len(LOCATIONS),
+            "successful_zones": 0,
+            "forecast": [],
+            "zone_ranking": [],
+            "best_forecast_zone": None,
+            "best_opportunity": None,
+        }
 
 
     # =====================================================
@@ -423,6 +457,22 @@ def live_solar_forecast():
 
 
     # =====================================================
+    # CURRENT HOUR GENERATION
+    # =====================================================
+
+    current_hour_bst = datetime.now(BANGLADESH_TZ).hour
+    current_hour_idx = df["timestamp"].dt.hour == current_hour_bst
+    if current_hour_idx.any():
+        current_hour_data = df[current_hour_idx].iloc[0]
+        current_generation_per_1mw = float(
+            current_hour_data["predicted_generation_mw_per_1mw"]
+        )
+        current_hour_timestamp = current_hour_data["timestamp"].isoformat()
+    else:
+        current_generation_per_1mw = 0.0
+        current_hour_timestamp = None
+
+    # =====================================================
     # BEST HOURLY OPPORTUNITY
     # =====================================================
 
@@ -467,10 +517,13 @@ def live_solar_forecast():
     return {
 
         "project":
-            "PowerFlex BD",
+            "PowerFlex BD v2.0",
 
         "resource":
             "Solar",
+
+        "module":
+            "Solar AI Forecast",
 
         "forecast_basis":
             "Weather forecast + Solar AI",
@@ -478,8 +531,42 @@ def live_solar_forecast():
         "data_source":
             "Open-Meteo forecast + PowerFlex Solar AI",
 
+        "data_classification":
+            "FORECAST",
+
+        "classification_details": {
+            "weather_data": "LIVE_FEED (Open-Meteo API)",
+            "solar_prediction": "FORECAST (XGBoost model trained on synthetic targets)",
+            "is_measured_generation": False,
+            "note": (
+                "These are weather-driven solar generation forecasts, "
+                "NOT actual plant telemetry. The model was trained on "
+                "synthetic targets derived from irradiance formulas, "
+                "not real Bangladesh solar farm output."
+            ),
+        },
+
+        "methodology": {
+            "model": "XGBoost regression (weather_only_solar_model.pkl)",
+            "features": "GHI, DNI, DHI, temperature, humidity, cloud cover, wind, zenith angle",
+            "training_target": "(irradiance / 1000) * 0.85 performance ratio — synthetic, not measured",
+            "validation_status": "EXPERIMENTAL — not validated against real Bangladesh solar generation",
+        },
+
         "forecast_hours":
             24,
+
+        "current_hour_generation": {
+            "mw_per_1mw_installed": round(
+                current_generation_per_1mw, 4
+            ),
+            "timestamp": current_hour_timestamp,
+            "data_classification": "FORECAST",
+            "note": (
+                "Hourly forecast for current hour. "
+                "Nighttime values are zero (no solar generation)."
+            ),
+        },
 
         "best_opportunity": {
 

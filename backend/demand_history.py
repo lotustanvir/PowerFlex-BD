@@ -1,9 +1,9 @@
 import csv
 import io
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -41,19 +41,28 @@ def is_duplicate(
     demand_mw: float,
     supply_mw: float,
 ) -> bool:
+    """Check if this observation is a rapid-polling duplicate.
 
+    Matches on demand_mw + supply_mw within a 30-minute window
+    rather than pgcb_timestamp, because PGCB returns sub-second
+    timestamp variations on each poll that prevent exact timestamp
+    matching.
+    """
     try:
         session = get_session()
         try:
+            # Look back 30 minutes from now for matching values
+            now = datetime.now(timezone.utc)
+            cutoff = now - timedelta(minutes=30)
+
             existing = (
                 session.query(DemandHistory)
                 .filter(
-                    DemandHistory.pgcb_timestamp
-                    == pgcb_timestamp,
                     DemandHistory.demand_mw
                     == round(demand_mw, 1),
                     DemandHistory.supply_mw
                     == round(supply_mw, 1),
+                    DemandHistory.timestamp >= cutoff,
                 )
                 .first()
             )
@@ -195,7 +204,10 @@ def read_history() -> list:
 # =========================================================
 
 def count_records() -> int:
+    """Count ALL rows in demand_history (including duplicates).
 
+    Use count_unique_observations() for forecast gate decisions.
+    """
     try:
         session = get_session()
         try:
@@ -210,6 +222,193 @@ def count_records() -> int:
         return 0
 
 
+def count_unique_observations() -> int:
+    """Count independent grid observations using state-change detection.
+
+    Walks all records chronologically. Consecutive records with
+    identical (demand_mw, supply_mw) values represent the same
+    underlying PGCB grid state observed via rapid polling — they
+    collapse into one independent observation. A state change
+    (different values)标志着 a new independent observation.
+
+    PGCB timestamp semantics:
+      - For hourly historical rows: pgcb_timestamp is the grid
+        observation time (clean hourly marks like 10:00:00).
+      - For rapid-polling live rows: pgcb_timestamp is the page
+        fetch time (sub-second like 21:11:23.551687), NOT the
+        grid measurement time. Multiple fetches within minutes
+        show the same grid state with varying page timestamps.
+    """
+    try:
+        session = get_session()
+        try:
+            records = (
+                session.query(DemandHistory)
+                .order_by(DemandHistory.timestamp.asc())
+                .all()
+            )
+
+            if not records:
+                return 0
+
+            independent = 1  # First record is always independent
+            for i in range(1, len(records)):
+                prev = records[i - 1]
+                curr = records[i]
+                same_demand = (
+                    round(float(prev.demand_mw), 1)
+                    == round(float(curr.demand_mw), 1)
+                )
+                same_supply = (
+                    round(float(prev.supply_mw), 1)
+                    == round(float(curr.supply_mw), 1)
+                )
+                if not (same_demand and same_supply):
+                    independent += 1
+
+            return independent
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.warning(
+            "Failed to count unique observations from DB: %s", e
+        )
+        return 0
+
+
+def get_demand_history_quality() -> Dict[str, Any]:
+    """Single source of truth for demand history data quality.
+
+    Uses state-change detection to count independent observations.
+    Consecutive records with identical (demand_mw, supply_mw) are
+    rapid-polling duplicates of the same PGCB grid state and count
+    as one observation.
+
+    Returns:
+      - raw_records: total rows in database
+      - independent_observations: state-change count (used by forecast gate)
+      - duplicates: raw_records - independent_observations
+      - duplicate_rate: duplicates / raw_records
+      - time_coverage_hours: span from earliest to latest record
+      - largest_gap_minutes: largest time gap between consecutive records
+      - avg_interval_minutes: average interval between consecutive records
+      - hourly_aligned_count: records at minute=0, second=0 (clean hourly marks)
+    """
+    try:
+        session = get_session()
+        try:
+            records = (
+                session.query(DemandHistory)
+                .order_by(DemandHistory.timestamp.asc())
+                .all()
+            )
+
+            if not records:
+                return {
+                    "raw_records": 0,
+                    "independent_observations": 0,
+                    "duplicates": 0,
+                    "duplicate_rate": 0.0,
+                    "time_coverage_hours": 0.0,
+                    "largest_gap_minutes": 0.0,
+                    "avg_interval_minutes": 0.0,
+                    "hourly_aligned_count": 0,
+                }
+
+            raw_count = len(records)
+
+            # State-change detection: walk chronologically
+            independent = 1
+            for i in range(1, len(records)):
+                prev = records[i - 1]
+                curr = records[i]
+                same_demand = (
+                    round(float(prev.demand_mw), 1)
+                    == round(float(curr.demand_mw), 1)
+                )
+                same_supply = (
+                    round(float(prev.supply_mw), 1)
+                    == round(float(curr.supply_mw), 1)
+                )
+                if not (same_demand and same_supply):
+                    independent += 1
+
+            # Time coverage
+            timestamps = [
+                r.timestamp for r in records
+                if r.timestamp is not None
+            ]
+            time_coverage_hours = 0.0
+            largest_gap_minutes = 0.0
+            avg_interval_minutes = 0.0
+
+            if len(timestamps) >= 2:
+                span = timestamps[-1] - timestamps[0]
+                time_coverage_hours = (
+                    span.total_seconds() / 3600
+                )
+
+                intervals = []
+                for i in range(1, len(timestamps)):
+                    delta = (
+                        timestamps[i] - timestamps[i - 1]
+                    )
+                    interval_min = delta.total_seconds() / 60
+                    intervals.append(interval_min)
+
+                if intervals:
+                    largest_gap_minutes = max(intervals)
+                    avg_interval_minutes = (
+                        sum(intervals) / len(intervals)
+                    )
+
+            # Hourly aligned count (minute=0, second=0)
+            hourly_aligned = sum(
+                1 for r in records
+                if r.timestamp is not None
+                and r.timestamp.minute == 0
+                and r.timestamp.second == 0
+            )
+
+            return {
+                "raw_records": raw_count,
+                "independent_observations": independent,
+                "duplicates": raw_count - independent,
+                "duplicate_rate": round(
+                    (raw_count - independent) / raw_count, 3
+                ) if raw_count > 0 else 0.0,
+                "time_coverage_hours": round(
+                    time_coverage_hours, 2
+                ),
+                "largest_gap_minutes": round(
+                    largest_gap_minutes, 1
+                ),
+                "avg_interval_minutes": round(
+                    avg_interval_minutes, 1
+                ),
+                "hourly_aligned_count": hourly_aligned,
+            }
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.warning(
+            "Failed to assess demand history quality: %s", e
+        )
+        return {
+            "raw_records": 0,
+            "independent_observations": 0,
+            "duplicates": 0,
+            "duplicate_rate": 0.0,
+            "time_coverage_hours": 0.0,
+            "largest_gap_minutes": 0.0,
+            "avg_interval_minutes": 0.0,
+            "hourly_aligned_count": 0,
+        }
+
+
 # =========================================================
 # API: GET /api/demand/history
 # =========================================================
@@ -219,6 +418,7 @@ def get_demand_history():
 
     records = read_history()
     count = len(records)
+    quality = get_demand_history_quality()
 
     latest = None
     earliest = None
@@ -248,6 +448,9 @@ def get_demand_history():
         "project": "PowerFlex BD",
         "module": "Demand History",
         "record_count": count,
+        "independent_observations": quality["independent_observations"],
+        "duplicates": quality["duplicates"],
+        "duplicate_rate": quality["duplicate_rate"],
         "storage": "postgresql",
         "latest_record": {
             "timestamp": latest.get("timestamp")
@@ -271,9 +474,16 @@ def get_demand_history():
         "latest_load_shedding_mw": latest_load_shed,
         "data_source": "PGCB_ERP",
         "data_classification": "OFFICIAL_PGCB",
+        "quality": {
+            "time_coverage_hours": quality["time_coverage_hours"],
+            "largest_gap_minutes": quality["largest_gap_minutes"],
+            "avg_interval_minutes": quality["avg_interval_minutes"],
+            "hourly_aligned_count": quality["hourly_aligned_count"],
+        },
         "message": (
-            f"{count} official PGCB observations "
-            f"recorded."
+            f"{quality['independent_observations']} independent observations "
+            f"from {count} raw records "
+            f"({quality['duplicates']} rapid-polling duplicates collapsed)."
         ),
     }
 

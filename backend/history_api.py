@@ -79,6 +79,7 @@ def get_grid_history(
                 data.append({
                     "id": r.id,
                     "timestamp": r.timestamp.isoformat() if r.timestamp else None,
+                    "collected_at": r.collected_at.isoformat() if r.collected_at else None,
                     "demand_mw": float(r.demand_mw) if r.demand_mw else None,
                     "supply_mw": float(r.supply_mw) if r.supply_mw else None,
                     "load_shedding_mw": float(r.load_shedding_mw) if r.load_shedding_mw else None,
@@ -95,6 +96,8 @@ def get_grid_history(
                     "import_mw": float(r.import_mw) if r.import_mw else None,
                     "grid_status": r.grid_status,
                     "risk_level": r.risk_level,
+                    "source": r.source,
+                    "data_classification": r.data_classification,
                 })
 
             return {
@@ -187,7 +190,6 @@ def get_predictions_history(
                     "zone": r.zone,
                     "predicted_mw": float(r.predicted_mw) if r.predicted_mw else None,
                     "actual_mw": float(r.actual_mw) if r.actual_mw else None,
-                    "features_json": r.features_json,
                     "model_version": r.model_version,
                 })
 
@@ -301,11 +303,11 @@ def get_loadshield_history(
 
 
 # =========================================================
-# GET /api/models
+# GET /api/models/history
 # =========================================================
 
-@router.get("/api/models")
-def get_model_registry(
+@router.get("/api/models/history")
+def get_model_history(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     model_type: Optional[str] = Query(None),

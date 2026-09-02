@@ -1,4 +1,14 @@
 from typing import Any, Dict, List, Optional
+import logging
+
+from backend.prototype_config import (
+    SOLAR_INSTALLED_MW,
+    WIND_INSTALLED_MW,
+    BATTERY_POWER_MW,
+    FLEXIBLE_DEMAND_MW,
+)
+
+logger = logging.getLogger("powerflex.optimizer")
 
 
 # =========================================================
@@ -120,10 +130,7 @@ ZONE_RESOURCE_ASSUMPTIONS = {
 }
 
 
-BATTERY_POWER_MW = 500.0
 BATTERY_SOC_PERCENT = 80.0
-
-FLEXIBLE_DEMAND_MW = 500.0
 
 MAX_ZONE_ALLOCATION_PERCENT = 0.40
 
@@ -260,7 +267,7 @@ def build_zone_analysis(
     """
     Evaluate all 9 Bangladesh zones.
 
-    For Solar and Wind, use LIVE AI forecast data
+    For Solar and Wind, use LIVE forecast data
     from existing modules.
 
     For Biomass, use calculated division-wise data
@@ -289,6 +296,16 @@ def build_zone_analysis(
         )
         if zone:
             wind_ranking[zone] = energy
+
+    # Extract current-hour generation (more accurate for dispatch)
+    solar_current_hour = safe_float(
+        solar_data.get("current_hour_generation", {})
+        .get("mw_per_1mw_installed", 0.0)
+    )
+    wind_current_hour = safe_float(
+        wind_data.get("current_hour_generation", {})
+        .get("mw_per_1mw_installed", 0.0)
+    )
 
     # Map biomass divisions to zones
     zone_biomass = {}
@@ -344,6 +361,12 @@ def build_zone_analysis(
             "wind_available_mwh_per_1mw_24h": round(
                 wind_score, 4
             ),
+            "solar_current_hour_mw_per_1mw": round(
+                solar_current_hour, 4
+            ),
+            "wind_current_hour_mw_per_1mw": round(
+                wind_current_hour, 4
+            ),
             "combined_renewable_score": round(
                 combined_score, 4
             ),
@@ -379,12 +402,12 @@ def build_zone_analysis(
                 ),
             "resource_source": {
                 "solar": (
-                    "LIVE - Open-Meteo "
-                    "+ PowerFlex Solar AI"
+                    "FORECAST - Open-Meteo "
+                    "+ PowerFlex Solar AI (current-hour forecast)"
                 ),
                 "wind": (
-                    "LIVE - Open-Meteo "
-                    "+ PowerFlex Wind AI"
+                    "CALCULATED - Open-Meteo "
+                    "+ PowerFlex Wind Power Curve (current-hour estimate)"
                 ),
                 "hydro": "PROTOTYPE - assumption",
                 "biomass": biomass_source_label,
@@ -451,12 +474,103 @@ def optimize(
     """
     Multi-resource deficit optimization engine.
 
+    Attempts mathematical (LP) optimization first.
+    Falls back to heuristic greedy dispatch if the
+    LP solver fails or is unavailable.
+
     1. Calculate deficit.
     2. If deficit <= 0 → SUPPLY_SUFFICIENT.
-    3. If deficit > 0 → find best combination across
+    3. If deficit > 0 → find optimal combination across
        9 zones to cover the deficit.
     4. Dispatch only what is needed.
     5. Spread across zones. Max 40% per zone.
+    """
+
+    # -----------------------------------------------------
+    # TRY MATHEMATICAL OPTIMIZER FIRST
+    # -----------------------------------------------------
+
+    try:
+        from backend.optimizer_math import (
+            optimize_mathematical,
+            math_result_to_dict,
+        )
+
+        math_result = optimize_mathematical(
+            demand_mw=demand_mw,
+            supply_mw=supply_mw,
+            solar_data=solar_data,
+            wind_data=wind_data,
+            biomass_divisions=biomass_divisions,
+            waste_zones=waste_zones,
+            hydro_total_mw=hydro_total_mw,
+            battery_mw=battery_mw,
+            flexible_demand_mw=flexible_demand_mw,
+        )
+
+        if math_result is not None:
+            logger.info(
+                "Mathematical optimizer succeeded: "
+                "status=%s remaining_gap=%.3f",
+                math_result.status,
+                math_result.remaining_gap,
+            )
+            return math_result_to_dict(
+                math_result,
+                solar_data,
+                wind_data,
+                biomass_divisions,
+                waste_zones,
+            )
+
+    except ImportError:
+        logger.info(
+            "optimizer_math not available, "
+            "using heuristic optimizer."
+        )
+    except Exception as e:
+        logger.warning(
+            "Mathematical optimizer failed (%s), "
+            "falling back to heuristic.",
+            e,
+        )
+
+    # -----------------------------------------------------
+    # HEURISTIC FALLBACK
+    # -----------------------------------------------------
+
+    return _optimize_heuristic(
+        demand_mw,
+        supply_mw,
+        solar_data,
+        wind_data,
+        biomass_divisions,
+        waste_zones,
+        hydro_total_mw,
+        battery_mw,
+        flexible_demand_mw,
+    )
+
+
+def _optimize_heuristic(
+    demand_mw: float,
+    supply_mw: float,
+    solar_data: Dict[str, Any],
+    wind_data: Dict[str, Any],
+    biomass_divisions: Optional[
+        Dict[str, Any]
+    ] = None,
+    waste_zones: Optional[
+        Dict[str, Any]
+    ] = None,
+    hydro_total_mw: float = 0.0,
+    battery_mw: float = BATTERY_POWER_MW,
+    flexible_demand_mw: float = FLEXIBLE_DEMAND_MW,
+) -> Dict[str, Any]:
+    """
+    Heuristic greedy dispatch engine (original algorithm).
+
+    Priority-ordered resource dispatch with zone caps.
     """
 
     demand = max(0.0, safe_float(demand_mw))
@@ -511,13 +625,29 @@ def optimize(
     # per zone derived from the global totals.
     # -----------------------------------------------------
 
+    # -----------------------------------------------------
+    # EXTRACT CURRENT-HOUR GENERATION
+    # -----------------------------------------------------
+    # Use current-hour generation per 1MW for dispatch.
+    # This is more accurate than daily average / 24
+    # because solar is zero at night and wind varies hourly.
+
+    solar_current_hour = safe_float(
+        solar_data.get("current_hour_generation", {})
+        .get("mw_per_1mw_installed", 0.0)
+    )
+    wind_current_hour = safe_float(
+        wind_data.get("current_hour_generation", {})
+        .get("mw_per_1mw_installed", 0.0)
+    )
+
     num_zones = len(BANGLADESH_ZONES)
 
     solar_per_zone_installed = (
-        1000.0 / num_zones
+        SOLAR_INSTALLED_MW / num_zones
     )
     wind_per_zone_installed = (
-        500.0 / num_zones
+        WIND_INSTALLED_MW / num_zones
     )
 
     zone_pools = []
@@ -526,20 +656,8 @@ def optimize(
 
         zone = za["zone"]
 
-        # Zone ranking scores are daily energy
-        # (MWh per 1 MW over 24h).
-        # Convert to average hourly generation
-        # (MW per 1 MW) by dividing by 24.
-
-        solar_daily_energy = safe_float(
-            za.get("solar_available_mwh_per_1mw_24h")
-        )
-        wind_daily_energy = safe_float(
-            za.get("wind_available_mwh_per_1mw_24h")
-        )
-
-        solar_gen_per_1mw = solar_daily_energy / 24.0
-        wind_gen_per_1mw = wind_daily_energy / 24.0
+        solar_gen_per_1mw = solar_current_hour
+        wind_gen_per_1mw = wind_current_hour
 
         solar_available_mw = (
             solar_gen_per_1mw * solar_per_zone_installed

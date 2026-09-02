@@ -23,6 +23,24 @@ export const API_ENDPOINTS = {
   PREDICTIONS_HISTORY: `${API_BASE}/api/predictions/history`,
   LOADSHIELD_HISTORY: `${API_BASE}/api/loadshield/history`,
   MODELS: `${API_BASE}/api/models`,
+  MODELS_HISTORY: `${API_BASE}/api/models/history`,
+  // v3 endpoints
+  V3_WEATHER_CURRENT: `${API_BASE}/api/v3/weather/current`,
+  V3_WEATHER_FORECAST: `${API_BASE}/api/v3/weather/forecast`,
+  V3_WEATHER_ZONES: `${API_BASE}/api/v3/weather/zones`,
+  V3_LOCATION_SEARCH: `${API_BASE}/api/v3/location/search`,
+  V3_LOCATION_ANALYZE: `${API_BASE}/api/v3/location/analyze`,
+  V3_LOCATION_COMPARE: `${API_BASE}/api/v3/location/compare`,
+  V3_LOCATION_AREA: `${API_BASE}/api/v3/location/area-analysis`,
+  V3_DEFICIT: `${API_BASE}/api/v3/recommendation/deficit`,
+  V3_TECHNOLOGY: `${API_BASE}/api/v3/recommendation/technology`,
+  V3_PLANT: `${API_BASE}/api/v3/recommendation/plant`,
+  V3_FULL_RECOMMENDATION: `${API_BASE}/api/v3/recommendation/full`,
+  V3_TECHNOLOGIES: `${API_BASE}/api/v3/recommendation/technologies`,
+  V3_SOURCES: `${API_BASE}/api/v3/sources`,
+  V3_SOURCES_SUMMARY: `${API_BASE}/api/v3/sources/summary`,
+  V3_DECISION_SUPPORT: `${API_BASE}/api/v3/recommendation/decision-support`,
+  V3_DECISION_SUPPORT_HEALTH: `${API_BASE}/api/v3/recommendation/decision-support/health`,
 } as const;
 
 export interface ApiResult<T> {

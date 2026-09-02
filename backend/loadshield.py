@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
+import concurrent.futures
+from typing import Any, Dict, Optional
 
 from backend.services.grid_service import get_grid_live
 from backend.services.solar_service import get_solar_live
@@ -28,6 +30,7 @@ from backend.waste_calculator import (
     calculate_all_cities,
     map_waste_to_zones,
 )
+from backend.risk_engine import compute_grid_risk, GridRiskResult
 
 
 # =========================================================
@@ -44,6 +47,17 @@ router = APIRouter(
 # HELPERS
 # =========================================================
 
+# Per-source timeout defaults (seconds)
+TIMEOUT_GRID = 60
+TIMEOUT_SOLAR = 30
+TIMEOUT_WIND = 30
+TIMEOUT_RESOURCES = 30
+TIMEOUT_BIOMASS = 15
+TIMEOUT_WASTE = 15
+TIMEOUT_DEMAND_MODEL = 10
+TIMEOUT_DEMAND_FORECAST = 30
+
+
 def safe_float(value):
     try:
         if value is None:
@@ -51,6 +65,82 @@ def safe_float(value):
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def fetch_with_timeout(
+    func,
+    *args,
+    timeout: int = 30,
+    default: Any = None,
+    label: str = "unknown",
+    **kwargs,
+) -> Any:
+    """Run *func* in a thread with a hard timeout.
+
+    Returns *default* on timeout or any exception so that
+    one slow data source never blocks the entire endpoint.
+    """
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(func, *args, **kwargs)
+            result = future.result(timeout=timeout)
+            logger.info("FETCH_OK label=%s", label)
+            return result
+    except concurrent.futures.TimeoutError:
+        logger.warning("FETCH_TIMEOUT label=%s timeout=%ss", label, timeout)
+        return default
+    except Exception:
+        logger.exception("FETCH_FAILED label=%s", label)
+        return default
+
+
+def _fetch_pair_with_timeout(
+    func_a,
+    args_a,
+    func_b,
+    args_b,
+    timeout: int = 30,
+    default_a: Any = None,
+    default_b: Any = None,
+    label_a: str = "a",
+    label_b: str = "b",
+) -> tuple:
+    """Run *func_a* and *func_b* concurrently in a shared pool.
+
+    Both run with the same hard *timeout*. If one stalls, the
+    other still completes. Returns ``(result_a, result_b)`` where
+    a failed/timed-out slot gets its corresponding *default_*.
+
+    The pool is NOT used as a context manager so that a slow
+    background thread cannot block the endpoint return.
+    """
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+    try:
+        future_a = pool.submit(func_a, *args_a)
+        future_b = pool.submit(func_b, *args_b)
+
+        result_a = default_a
+        result_b = default_b
+
+        try:
+            result_a = future_a.result(timeout=timeout)
+            logger.info("FETCH_OK label=%s", label_a)
+        except concurrent.futures.TimeoutError:
+            logger.warning("FETCH_TIMEOUT label=%s timeout=%ss", label_a, timeout)
+        except Exception:
+            logger.exception("FETCH_FAILED label=%s", label_a)
+
+        try:
+            result_b = future_b.result(timeout=timeout)
+            logger.info("FETCH_OK label=%s", label_b)
+        except concurrent.futures.TimeoutError:
+            logger.warning("FETCH_TIMEOUT label=%s timeout=%ss", label_b, timeout)
+        except Exception:
+            logger.exception("FETCH_FAILED label=%s", label_b)
+
+        return result_a, result_b
+    finally:
+        pool.shutdown(wait=False)
 
 
 # =========================================================
@@ -68,7 +158,7 @@ def log_dispatch(
         session = get_session()
         with session:
             dispatch = LoadshieldDispatch(
-                timestamp=datetime.now(),
+                timestamp=datetime.now(timezone.utc),
                 demand_mw=demand_mw,
                 supply_mw=supply_mw,
                 deficit_mw=deficit_mw,
@@ -92,31 +182,50 @@ def log_dispatch(
 
 
 # =========================================================
-# RISK
+# RISK — delegated to risk_engine.py
 # =========================================================
 
 def calculate_risk(
     gap_mw,
     demand_mw,
 ):
-
+    """Legacy helper kept for backward-compat callers."""
     if demand_mw is None or demand_mw <= 0:
         return "UNKNOWN"
-
     if gap_mw <= 0:
         return "LOW"
-
-    gap_percent = (
-        gap_mw / demand_mw
-    ) * 100
-
+    gap_percent = (gap_mw / demand_mw) * 100
     if gap_percent <= 5:
         return "MODERATE"
-
     if gap_percent <= 15:
         return "HIGH"
-
     return "CRITICAL"
+
+
+def _build_risk_assessment(
+    demand_mw: float,
+    supply_mw: float,
+    solar_data: Dict[str, Any],
+    wind_data: Dict[str, Any],
+    biomass_divisions: Optional[Dict[str, Any]],
+    waste_zones: Optional[Dict[str, Any]],
+    load_shedding_mw: float = 0.0,
+) -> GridRiskResult:
+    """Run the full Grid Risk Score engine."""
+    from backend.optimizer import SOLAR_INSTALLED_MW, WIND_INSTALLED_MW
+
+    return compute_grid_risk(
+        demand_mw=demand_mw,
+        supply_mw=supply_mw,
+        solar_data=solar_data,
+        wind_data=wind_data,
+        biomass_data=biomass_divisions,
+        waste_data=waste_zones,
+        load_shedding_mw=load_shedding_mw,
+        solar_installed_mw=SOLAR_INSTALLED_MW,
+        wind_installed_mw=WIND_INSTALLED_MW,
+        include_scenarios=True,
+    )
 
 
 def _build_resource_analysis(
@@ -139,12 +248,17 @@ def _build_resource_analysis(
             "best_opportunity": solar_data.get(
                 "best_opportunity"
             ),
-            "data_source": "PGCB + Solar AI",
+            "data_source": "PGCB ERP (generation) + Open-Meteo + Solar AI (forecast)",
             "data_classification":
-                "OFFICIAL_PGCB",
+                "OFFICIAL_PGCB (generation) / FORECAST (AI prediction)",
             "is_bangladesh_data": True,
             "is_current": True,
-            "usable_for_dispatch": True,
+            "usable_for_dispatch": False,
+            "note": (
+                "Current generation from PGCB ERP is official. "
+                "Zone forecasts are weather-driven model predictions, "
+                "not measured plant output."
+            ),
         },
         "wind": {
             "current_generation_mw":
@@ -156,12 +270,17 @@ def _build_resource_analysis(
             "best_opportunity": wind_data.get(
                 "best_opportunity"
             ),
-            "data_source": "PGCB + Wind AI",
+            "data_source": "PGCB ERP (generation) + Open-Meteo + Wind Power Curve (estimate)",
             "data_classification":
-                "OFFICIAL_PGCB",
+                "OFFICIAL_PGCB (generation) / CALCULATED (power curve estimate)",
             "is_bangladesh_data": True,
             "is_current": True,
-            "usable_for_dispatch": True,
+            "usable_for_dispatch": False,
+            "note": (
+                "Current generation from PGCB ERP is official. "
+                "Zone estimates are engineering model outputs, "
+                "not measured turbine generation."
+            ),
         },
         "hydro": {
             "current_generation_mw":
@@ -345,22 +464,29 @@ def _build_resource_analysis(
 def loadshield_live():
 
     # =====================================================
-    # 1. FETCH REAL GRID DATA
+    # 1. FETCH REAL GRID DATA (per-source timeout)
     # =====================================================
     logger.info("LOADSHIELD_STAGE=grid START")
 
-    grid_data = get_grid_live()
+    grid_data = fetch_with_timeout(
+        get_grid_live,
+        timeout=TIMEOUT_GRID,
+        default=None,
+        label="grid_live",
+    )
 
     if grid_data is None:
         logger.error("LOADSHIELD_STAGE=grid FAILED result=None")
         raise HTTPException(
             status_code=502,
-            detail=(
-                "Grid service returned no data."
-            ),
+            detail="Grid service returned no data.",
         )
 
-    logger.info("LOADSHIELD_STAGE=grid SUCCESS connected=%s live=%s", grid_data.get("connected"), grid_data.get("live"))
+    logger.info(
+        "LOADSHIELD_STAGE=grid SUCCESS connected=%s live=%s",
+        grid_data.get("connected"),
+        grid_data.get("live"),
+    )
 
     # =====================================================
     # PGCB CHECK
@@ -399,28 +525,32 @@ def loadshield_live():
             "current_recommendation": None,
             "forecast_preparation": None,
 
+            "grid_risk": None,
+
             "message":
                 (
                     "Official PGCB/NLDC data required "
                     "before making a real grid decision. "
                     "LoadShield will not use hardcoded "
-                    "demand or supply values."
+                    "demand or supply values. "
+                    "Note: LoadShield provides scenario-based "
+                    "recommendations, not real-time dispatch commands."
                 ),
 
             "data_source": {
                 "grid":
                     "PGCB / NLDC (not connected)",
                 "solar":
-                    "Open-Meteo + PowerFlex Solar AI",
+                    "Open-Meteo + PowerFlex Solar AI (FORECAST)",
                 "wind":
-                    "Open-Meteo + PowerFlex Wind AI",
+                    "Open-Meteo + PowerFlex Wind Power Curve (CALCULATED)",
                 "demand_forecast":
-                    "MODEL_FORECAST",
+                    "MODEL_FORECAST (synthetic training data)",
                 "hydro": "PGCB ERP",
                 "biomass":
-                    "FAOSTAT / DLS / BBS / SREDA",
+                    "FAOSTAT / DLS / BBS / SREDA (CALCULATED)",
                 "waste":
-                    "DNCC / DSCC / AIIB / NDB",
+                    "DNCC / DSCC / AIIB / NDB (CALCULATED)",
                 "battery": "PROTOTYPE - assumption",
                 "flexible_demand":
                     "PROTOTYPE - assumption",
@@ -435,26 +565,23 @@ def loadshield_live():
     grid = grid_data.get("data")
 
     if not grid:
-        logger.error("LOADSHIELD_STAGE=extract FAILED grid_data=%s", list(grid_data.keys()) if grid_data else None)
-
+        logger.error(
+            "LOADSHIELD_STAGE=extract FAILED grid_data=%s",
+            list(grid_data.keys()) if grid_data else None,
+        )
         raise HTTPException(
             status_code=502,
             detail="PGCB grid snapshot is missing.",
         )
 
-    demand_mw = safe_float(
-        grid.get("current_demand_mw")
-    )
+    demand_mw = safe_float(grid.get("current_demand_mw"))
+    supply_mw = safe_float(grid.get("supply_mw"))
+    load_shedding_mw = safe_float(grid.get("load_shedding_mw"))
 
-    supply_mw = safe_float(
-        grid.get("supply_mw")
+    logger.info(
+        "LOADSHIELD_STAGE=extract SUCCESS demand=%s supply=%s load_shed=%s",
+        demand_mw, supply_mw, load_shedding_mw,
     )
-
-    load_shedding_mw = safe_float(
-        grid.get("load_shedding_mw")
-    )
-
-    logger.info("LOADSHIELD_STAGE=extract SUCCESS demand=%s supply=%s load_shed=%s", demand_mw, supply_mw, load_shedding_mw)
 
     # =====================================================
     # DATA VALIDATION
@@ -491,6 +618,8 @@ def loadshield_live():
             "current_recommendation": None,
             "forecast_preparation": None,
 
+            "grid_risk": None,
+
             "message": (
                 "PGCB demand data is unavailable."
             ),
@@ -525,6 +654,8 @@ def loadshield_live():
             "current_recommendation": None,
             "forecast_preparation": None,
 
+            "grid_risk": None,
+
             "message": (
                 "PGCB supply data is unavailable."
             ),
@@ -534,86 +665,76 @@ def loadshield_live():
     # 3. CALCULATE DEFICIT
     # =====================================================
 
-    deficit_mw = max(
-        demand_mw - supply_mw, 0.0
+    deficit_mw = max(demand_mw - supply_mw, 0.0)
+
+    # =====================================================
+    # 4. FETCH SOLAR + WIND AI FORECASTS (concurrent, per-source timeout)
+    # =====================================================
+    logger.info("LOADSHIELD_STAGE=solar_wind START")
+
+    solar_data, wind_data = _fetch_pair_with_timeout(
+        func_a=get_solar_live,
+        args_a=(),
+        func_b=get_wind_live,
+        args_b=(),
+        timeout=max(TIMEOUT_SOLAR, TIMEOUT_WIND),
+        default_a={},
+        default_b={},
+        label_a="solar_live",
+        label_b="wind_live",
     )
 
-    # =====================================================
-    # 4. FETCH SOLAR + WIND AI FORECASTS
-    # =====================================================
-    logger.info("LOADSHIELD_STAGE=solar START")
-
-    try:
-        solar_raw = get_solar_live()
-        solar_data = solar_raw if solar_raw and solar_raw.get("status") != "ERROR" else {}
-        logger.info("LOADSHIELD_STAGE=solar SUCCESS keys=%s", list(solar_data.keys())[:5])
-    except Exception:
-        logger.exception("LOADSHIELD_STAGE=solar FAILED")
+    if solar_data and solar_data.get("status") in ("ERROR", "DATA_UNAVAILABLE"):
         solar_data = {}
 
-    logger.info("LOADSHIELD_STAGE=wind START")
-
-    try:
-        wind_raw = get_wind_live()
-        wind_data = wind_raw if wind_raw and wind_raw.get("status") != "ERROR" else {}
-        logger.info("LOADSHIELD_STAGE=wind SUCCESS keys=%s", list(wind_data.keys())[:5])
-    except Exception:
-        logger.exception("LOADSHIELD_STAGE=wind FAILED")
+    if wind_data and wind_data.get("status") in ("ERROR", "DATA_UNAVAILABLE"):
         wind_data = {}
 
     # =====================================================
     # 4b. FETCH UNIFIED RESOURCE DATA
-    #     Reuse already-fetched grid/solar/wind to avoid
-    #     duplicate external requests.
     # =====================================================
     logger.info("LOADSHIELD_STAGE=resources START")
 
-    try:
-        resource_data = fetch_all_resources(
-            prefetched_grid_data=grid_data,
-            prefetched_solar_data=solar_data,
-            prefetched_wind_data=wind_data,
-        )
-        logger.info("LOADSHIELD_STAGE=resources SUCCESS keys=%s", list(resource_data.keys())[:8])
-    except Exception:
-        logger.exception("LOADSHIELD_STAGE=resources FAILED")
-        resource_data = {}
+    resource_data = fetch_with_timeout(
+        fetch_all_resources,
+        prefetched_grid_data=grid_data,
+        prefetched_solar_data=solar_data,
+        prefetched_wind_data=wind_data,
+        timeout=TIMEOUT_RESOURCES,
+        default={},
+        label="resources",
+    )
 
     # =====================================================
-    # 4c. FETCH BIOMASS POTENTIAL DATA
+    # 4c. FETCH BIOMASS POTENTIAL DATA (parallel)
     # =====================================================
     logger.info("LOADSHIELD_STAGE=biomass START")
 
-    biomass_divisions = None
-
-    try:
-        biomass_result = calculate_all_divisions(
-            use_fallback=True
-        )
-        biomass_divisions = biomass_result.get(
-            "divisions", {}
-        )
-        logger.info("LOADSHIELD_STAGE=biomass SUCCESS divisions=%s", len(biomass_divisions) if biomass_divisions else 0)
-    except Exception:
-        logger.exception("LOADSHIELD_STAGE=biomass FAILED")
-        biomass_divisions = None
+    biomass_raw = fetch_with_timeout(
+        calculate_all_divisions,
+        True,
+        timeout=TIMEOUT_BIOMASS,
+        default=None,
+        label="biomass",
+    )
+    biomass_divisions = biomass_raw.get("divisions", {}) if biomass_raw else None
 
     # =====================================================
-    # 4d. FETCH WASTE-TO-ENERGY POTENTIAL DATA
+    # 4d. FETCH WASTE-TO-ENERGY POTENTIAL DATA (parallel)
     # =====================================================
     logger.info("LOADSHIELD_STAGE=waste START")
 
-    waste_zones = None
-
-    try:
-        waste_cities = calculate_all_cities()
-        waste_zones = map_waste_to_zones(
-            waste_cities.get("cities", {})
-        )
-        logger.info("LOADSHIELD_STAGE=waste SUCCESS zones=%s", len(waste_zones) if waste_zones else 0)
-    except Exception:
-        logger.exception("LOADSHIELD_STAGE=waste FAILED")
-        waste_zones = None
+    waste_cities = fetch_with_timeout(
+        calculate_all_cities,
+        timeout=TIMEOUT_WASTE,
+        default=None,
+        label="waste",
+    )
+    waste_zones = (
+        map_waste_to_zones(waste_cities.get("cities", {}))
+        if waste_cities
+        else None
+    )
 
     # =====================================================
     # 5. GENERATE DEMAND FORECAST
@@ -624,28 +745,49 @@ def loadshield_live():
     forecast_peak_deficit = 0.0
     forecast_additional_requirement = 0.0
 
-    try:
-        model = train_demand_model()
-        forecast_data = forecast_24h_demand(
-            demand_mw, model
+    model = fetch_with_timeout(
+        train_demand_model,
+        timeout=TIMEOUT_DEMAND_MODEL,
+        default=None,
+        label="demand_model",
+    )
+    if model is not None:
+        forecast_data = fetch_with_timeout(
+            forecast_24h_demand,
+            demand_mw,
+            model,
+            timeout=TIMEOUT_DEMAND_FORECAST,
+            default=None,
+            label="demand_forecast",
         )
 
-        forecast_peak = safe_float(
-            forecast_data.get("forecast_peak_mw")
+    if forecast_data:
+        forecast_peak = safe_float(forecast_data.get("forecast_peak_mw"))
+        if forecast_peak and forecast_peak > supply_mw:
+            forecast_peak_deficit = max(forecast_peak - supply_mw, 0.0)
+            forecast_additional_requirement = max(forecast_peak - demand_mw, 0.0)
+        logger.info(
+            "LOADSHIELD_STAGE=demand_forecast SUCCESS peak=%s",
+            forecast_data.get("forecast_peak_mw"),
         )
 
-        if forecast_peak > supply_mw:
-            forecast_peak_deficit = max(
-                forecast_peak - supply_mw, 0.0
-            )
-            forecast_additional_requirement = max(
-                forecast_peak - demand_mw, 0.0
-            )
+    # =====================================================
+    # 5b. COMPUTE GRID RISK SCORE
+    # =====================================================
+    logger.info("LOADSHIELD_STAGE=risk START")
 
-        logger.info("LOADSHIELD_STAGE=demand_forecast SUCCESS peak=%s", forecast_data.get("forecast_peak_mw"))
-    except Exception:
-        logger.exception("LOADSHIELD_STAGE=demand_forecast FAILED")
-        forecast_data = None
+    risk_result = _build_risk_assessment(
+        demand_mw=demand_mw,
+        supply_mw=supply_mw,
+        solar_data=solar_data,
+        wind_data=wind_data,
+        biomass_divisions=biomass_divisions,
+        waste_zones=waste_zones,
+        load_shedding_mw=load_shedding_mw or 0.0,
+    )
+
+    risk_level = risk_result.risk_level
+    grid_risk_dict = risk_result.to_dict()
 
     # =====================================================
     # 6. IF SUPPLY >= DEMAND
@@ -655,15 +797,10 @@ def loadshield_live():
 
         forecast_preparation = None
 
-        if (
-            forecast_data
-            and forecast_peak_deficit > 0
-        ):
+        if forecast_data and forecast_peak_deficit > 0:
 
             forecast_prep_result = optimize(
-                demand_mw=forecast_data[
-                    "forecast_peak_mw"
-                ],
+                demand_mw=forecast_data["forecast_peak_mw"],
                 supply_mw=supply_mw,
                 solar_data=solar_data,
                 wind_data=wind_data,
@@ -674,26 +811,15 @@ def loadshield_live():
             forecast_preparation = {
                 "status": "PREPARATION_RECOMMENDED",
                 "forecast_peak_mw": round(
-                    forecast_data["forecast_peak_mw"],
-                    1,
+                    forecast_data["forecast_peak_mw"], 1,
                 ),
-                "peak_timestamp": forecast_data[
-                    "peak_timestamp"
-                ],
+                "peak_timestamp": forecast_data["peak_timestamp"],
                 "expected_additional_requirement_mw":
-                    round(
-                        forecast_additional_requirement,
-                        1,
-                    ),
-                "expected_deficit_mw": round(
-                    forecast_peak_deficit, 1
-                ),
+                    round(forecast_additional_requirement, 1),
+                "expected_deficit_mw": round(forecast_peak_deficit, 1),
                 "recommended_deployment":
-                    forecast_prep_result[
-                        "recommended_deployment"
-                    ],
-                "data_classification":
-                    "MODEL_FORECAST",
+                    forecast_prep_result["recommended_deployment"],
+                "data_classification": "MODEL_FORECAST",
             }
 
         elif forecast_data:
@@ -701,18 +827,14 @@ def loadshield_live():
             forecast_preparation = {
                 "status": "NO_ACTION_NEEDED",
                 "forecast_peak_mw": round(
-                    forecast_data["forecast_peak_mw"],
-                    1,
+                    forecast_data["forecast_peak_mw"], 1,
                 ),
-                "peak_timestamp": forecast_data[
-                    "peak_timestamp"
-                ],
+                "peak_timestamp": forecast_data["peak_timestamp"],
                 "message": (
                     "Forecast peak demand is within "
                     "current supply capacity."
                 ),
-                "data_classification":
-                    "MODEL_FORECAST",
+                "data_classification": "MODEL_FORECAST",
             }
 
         log_dispatch(
@@ -728,7 +850,7 @@ def loadshield_live():
             flexible_mw=FLEXIBLE_DEMAND_MW,
             remaining_gap=0.0,
             status="SUPPLY_SUFFICIENT",
-            risk_level="LOW",
+            risk_level=risk_level,
             zone_breakdown=json.dumps([]),
         )
 
@@ -739,41 +861,29 @@ def loadshield_live():
 
             "current_situation": {
                 "grid": {
-                    "demand_mw": round(
-                        demand_mw, 3
-                    ),
-                    "supply_mw": round(
-                        supply_mw, 3
-                    ),
+                    "demand_mw": round(demand_mw, 3),
+                    "supply_mw": round(supply_mw, 3),
                     "deficit_mw": 0.0,
                     "load_shedding_mw": round(
                         load_shedding_mw, 3
                     ) if load_shedding_mw else 0.0,
                     "source": "PGCB_OFFICIAL",
-                    "data_classification":
-                        "OFFICIAL_PGCB",
+                    "data_classification": "OFFICIAL_PGCB",
                 },
+                "risk_level": risk_level,
+                "system_status": "BALANCED",
             },
 
             "forecast_situation": (
                 {
                     "forecast_peak_mw": round(
-                        forecast_data[
-                            "forecast_peak_mw"
-                        ],
-                        1,
+                        forecast_data["forecast_peak_mw"], 1,
                     ),
-                    "peak_timestamp": forecast_data[
-                        "peak_timestamp"
-                    ],
+                    "peak_timestamp": forecast_data["peak_timestamp"],
                     "current_demand_mw": round(
-                        forecast_data[
-                            "current_pgcb_demand_mw"
-                        ],
-                        1,
+                        forecast_data["current_pgcb_demand_mw"], 1,
                     ),
-                    "data_classification":
-                        "MODEL_FORECAST",
+                    "data_classification": "MODEL_FORECAST",
                 }
                 if forecast_data
                 else None
@@ -798,39 +908,38 @@ def loadshield_live():
                 "recommended_deployment": [],
             },
 
-            "forecast_preparation":
-                forecast_preparation,
+            "forecast_preparation": forecast_preparation,
+
+            "grid_risk": grid_risk_dict,
 
             "message": (
                 "Current PGCB supply is sufficient "
                 "for the reported demand. "
-                "No emergency dispatch is required."
+                "No emergency dispatch is required. "
+                "Note: This analysis provides scenario-based "
+                "recommendations only."
             ),
 
             "data_source": {
-                "grid":
-                    "PGCB_OFFICIAL (live)",
-                "solar":
-                    "Open-Meteo + PowerFlex Solar AI",
-                "wind":
-                    "Open-Meteo + PowerFlex Wind AI",
-                "demand_forecast":
-                    "MODEL_FORECAST",
+                "grid": "PGCB_OFFICIAL (live)",
+                "solar": "Open-Meteo + PowerFlex Solar AI",
+                "wind": "Open-Meteo + PowerFlex Wind AI",
+                "demand_forecast": "MODEL_FORECAST",
                 "hydro": "PGCB ERP",
-                "biomass":
-                    "FAOSTAT / DLS / BBS / SREDA",
-                "waste":
-                    "DNCC / DSCC / AIIB / NDB",
+                "biomass": "FAOSTAT / DLS / BBS / SREDA",
+                "waste": "DNCC / DSCC / AIIB / NDB",
                 "battery": "PROTOTYPE - assumption",
-                "flexible_demand":
-                    "PROTOTYPE - assumption",
+                "flexible_demand": "PROTOTYPE - assumption",
             },
         }
 
     # =====================================================
     # 7. RUN OPTIMIZER (CURRENT)
     # =====================================================
-    logger.info("LOADSHIELD_STAGE=optimizer START demand=%s supply=%s deficit=%s", demand_mw, supply_mw, deficit_mw)
+    logger.info(
+        "LOADSHIELD_STAGE=optimizer START demand=%s supply=%s deficit=%s",
+        demand_mw, supply_mw, deficit_mw,
+    )
 
     try:
         result = optimize(
@@ -841,27 +950,25 @@ def loadshield_live():
             biomass_divisions=biomass_divisions,
             waste_zones=waste_zones,
         )
-        logger.info("LOADSHIELD_STAGE=optimizer SUCCESS status=%s remaining_gap=%s", result.get("status"), result.get("remaining_gap_mw"))
+        logger.info(
+            "LOADSHIELD_STAGE=optimizer SUCCESS status=%s remaining_gap=%s",
+            result.get("status"), result.get("remaining_gap_mw"),
+        )
     except Exception:
         logger.exception("LOADSHIELD_STAGE=optimizer FAILED")
         raise
 
     # =====================================================
-    # 8. RISK + STATUS
+    # 8. SYSTEM STATUS
     # =====================================================
 
     remaining_gap = result["remaining_gap_mw"]
-
-    risk_level = calculate_risk(
-        remaining_gap,
-        demand_mw,
-    )
 
     if remaining_gap <= 0:
         system_status = "BALANCED"
     elif risk_level == "MODERATE":
         system_status = "WATCH"
-    elif risk_level == "HIGH":
+    elif risk_level == "ELEVATED":
         system_status = "STRESSED"
     else:
         system_status = "CRITICAL"
@@ -872,15 +979,10 @@ def loadshield_live():
 
     forecast_preparation = None
 
-    if (
-        forecast_data
-        and forecast_peak_deficit > 0
-    ):
+    if forecast_data and forecast_peak_deficit > 0:
 
         forecast_prep_result = optimize(
-            demand_mw=forecast_data[
-                "forecast_peak_mw"
-            ],
+            demand_mw=forecast_data["forecast_peak_mw"],
             supply_mw=supply_mw,
             solar_data=solar_data,
             wind_data=wind_data,
@@ -888,9 +990,7 @@ def loadshield_live():
             waste_zones=waste_zones,
         )
 
-        prep_remaining = forecast_prep_result[
-            "remaining_gap_mw"
-        ]
+        prep_remaining = forecast_prep_result["remaining_gap_mw"]
 
         prep_risk = calculate_risk(
             prep_remaining,
@@ -900,25 +1000,17 @@ def loadshield_live():
         forecast_preparation = {
             "status": "PREPARATION_RECOMMENDED",
             "forecast_peak_mw": round(
-                forecast_data["forecast_peak_mw"], 1
+                forecast_data["forecast_peak_mw"], 1,
             ),
-            "peak_timestamp": forecast_data[
-                "peak_timestamp"
-            ],
+            "peak_timestamp": forecast_data["peak_timestamp"],
             "expected_additional_requirement_mw":
-                round(
-                    forecast_additional_requirement, 1
-                ),
-            "expected_deficit_mw": round(
-                forecast_peak_deficit, 1
-            ),
+                round(forecast_additional_requirement, 1),
+            "expected_deficit_mw": round(forecast_peak_deficit, 1),
             "remaining_gap_after_dispatch_mw":
                 round(prep_remaining, 1),
             "risk_level": prep_risk,
             "recommended_deployment":
-                forecast_prep_result[
-                    "recommended_deployment"
-                ],
+                forecast_prep_result["recommended_deployment"],
             "data_classification": "MODEL_FORECAST",
         }
 
@@ -927,11 +1019,9 @@ def loadshield_live():
         forecast_preparation = {
             "status": "NO_ACTION_NEEDED",
             "forecast_peak_mw": round(
-                forecast_data["forecast_peak_mw"], 1
+                forecast_data["forecast_peak_mw"], 1,
             ),
-            "peak_timestamp": forecast_data[
-                "peak_timestamp"
-            ],
+            "peak_timestamp": forecast_data["peak_timestamp"],
             "message": (
                 "Forecast peak demand is within "
                 "current supply capacity."
@@ -942,7 +1032,10 @@ def loadshield_live():
     # =====================================================
     # 10. LOG DISPATCH + RESPONSE
     # =====================================================
-    logger.info("LOADSHIELD_STAGE=response status=%s deficit=%s", result.get("status"), deficit_mw)
+    logger.info(
+        "LOADSHIELD_STAGE=response status=%s deficit=%s",
+        result.get("status"), deficit_mw,
+    )
 
     log_dispatch(
         demand_mw=demand_mw,
@@ -975,8 +1068,7 @@ def loadshield_live():
                     load_shedding_mw, 3
                 ) if load_shedding_mw else 0.0,
                 "source": "PGCB_OFFICIAL",
-                "data_classification":
-                    "OFFICIAL_PGCB",
+                "data_classification": "OFFICIAL_PGCB",
             },
             "risk_level": risk_level,
             "system_status": system_status,
@@ -985,22 +1077,13 @@ def loadshield_live():
         "forecast_situation": (
             {
                 "forecast_peak_mw": round(
-                    forecast_data[
-                        "forecast_peak_mw"
-                    ],
-                    1,
+                    forecast_data["forecast_peak_mw"], 1,
                 ),
-                "peak_timestamp": forecast_data[
-                    "peak_timestamp"
-                ],
+                "peak_timestamp": forecast_data["peak_timestamp"],
                 "current_demand_mw": round(
-                    forecast_data[
-                        "current_pgcb_demand_mw"
-                    ],
-                    1,
+                    forecast_data["current_pgcb_demand_mw"], 1,
                 ),
-                "data_classification":
-                    "MODEL_FORECAST",
+                "data_classification": "MODEL_FORECAST",
             }
             if forecast_data
             else None
@@ -1019,42 +1102,31 @@ def loadshield_live():
 
         "current_recommendation": {
             "status": result["status"],
-            "initial_deficit_mw": result[
-                "initial_deficit_mw"
-            ],
-            "total_support_mw": result[
-                "total_support_mw"
-            ],
-            "remaining_gap_mw": result[
-                "remaining_gap_mw"
-            ],
+            "initial_deficit_mw": result["initial_deficit_mw"],
+            "total_support_mw": result["total_support_mw"],
+            "remaining_gap_mw": result["remaining_gap_mw"],
             "risk_level": risk_level,
             "system_status": system_status,
-            "recommended_deployment": result[
-                "recommended_deployment"
-            ],
+            "recommended_deployment": result["recommended_deployment"],
         },
 
-        "forecast_preparation":
-            forecast_preparation,
+        "forecast_preparation": forecast_preparation,
 
-            "data_source": {
-                "grid": "PGCB / NLDC",
-                "solar":
-                    "Open-Meteo + PowerFlex Solar AI",
-                "wind":
-                    "Open-Meteo + PowerFlex Wind AI",
-                "demand_forecast": "MODEL_FORECAST",
-                "hydro": "PGCB ERP",
-                "gas": "PGCB ERP",
-                "liquid_fuel": "PGCB ERP",
-                "coal": "PGCB ERP",
-                "biomass":
-                    "FAOSTAT / DLS / BBS / SREDA",
-                "waste":
-                    "DNCC / DSCC / AIIB / NDB",
-                "nuclear": "DATA_UNAVAILABLE",
-                "battery": "PROTOTYPE",
-                "flexible_demand": "PROTOTYPE",
-            },
+        "grid_risk": grid_risk_dict,
+
+        "data_source": {
+            "grid": "PGCB / NLDC (official)",
+            "solar": "Open-Meteo + PowerFlex Solar AI (FORECAST)",
+            "wind": "Open-Meteo + PowerFlex Wind Power Curve (CALCULATED)",
+            "demand_forecast": "MODEL_FORECAST (synthetic training data)",
+            "hydro": "PGCB ERP",
+            "gas": "PGCB ERP",
+            "liquid_fuel": "PGCB ERP",
+            "coal": "PGCB ERP",
+            "biomass": "FAOSTAT / DLS / BBS / SREDA (CALCULATED)",
+            "waste": "DNCC / DSCC / AIIB / NDB (CALCULATED)",
+            "nuclear": "DATA_UNAVAILABLE",
+            "battery": "PROTOTYPE",
+            "flexible_demand": "PROTOTYPE",
+        },
     }

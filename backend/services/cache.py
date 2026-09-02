@@ -132,6 +132,8 @@ _grid_cache = Cache("grid", default_ttl=60)
 _solar_cache = Cache("solar", default_ttl=300)
 _wind_cache = Cache("wind", default_ttl=300)
 _resource_cache = Cache("resource", default_ttl=60)
+_biomass_cache = Cache("biomass", default_ttl=3600)
+_waste_cache = Cache("waste", default_ttl=3600)
 
 
 def get_grid_cache() -> Cache:
@@ -152,3 +154,13 @@ def get_wind_cache() -> Cache:
 def get_resource_cache() -> Cache:
     """Return the shared resource cache instance."""
     return _resource_cache
+
+
+def get_biomass_cache() -> Cache:
+    """Return the shared biomass cache instance."""
+    return _biomass_cache
+
+
+def get_waste_cache() -> Cache:
+    """Return the shared waste cache instance."""
+    return _waste_cache

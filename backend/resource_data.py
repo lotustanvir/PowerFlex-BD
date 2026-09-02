@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -6,6 +7,8 @@ from fastapi import APIRouter, HTTPException
 from backend.services.grid_service import get_grid_live
 from backend.services.solar_service import get_solar_live
 from backend.services.wind_service import get_wind_live
+
+logger = logging.getLogger("powerflex.resources")
 
 
 # =========================================================
@@ -162,25 +165,57 @@ def fetch_all_resources(
 
     now = datetime.now(timezone.utc).isoformat()
 
-    grid_data = (
-        prefetched_grid_data
-        if prefetched_grid_data is not None
-        else get_grid_live()
+    # Fetch grid, solar, and wind concurrently when not prefetched
+    import concurrent.futures
+
+    grid_data = prefetched_grid_data
+    solar_raw = prefetched_solar_data
+    wind_raw = prefetched_wind_data
+
+    fetches_needed = []
+    if grid_data is None:
+        fetches_needed.append(("grid", get_grid_live))
+    if solar_raw is None:
+        fetches_needed.append(("solar", get_solar_live))
+    if wind_raw is None:
+        fetches_needed.append(("wind", get_wind_live))
+
+    if fetches_needed:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(fetches_needed)
+        ) as executor:
+            future_map = {
+                executor.submit(fn): name
+                for name, fn in fetches_needed
+            }
+            for future in concurrent.futures.as_completed(future_map):
+                name = future_map[future]
+                try:
+                    result = future.result(timeout=45)
+                    if name == "grid":
+                        grid_data = result
+                    elif name == "solar":
+                        solar_raw = result
+                    elif name == "wind":
+                        wind_raw = result
+                except Exception:
+                    logger.warning("Resource fetch '%s' failed", name)
+
+    solar_data = (
+        solar_raw
+        if solar_raw
+        and isinstance(solar_raw, dict)
+        and solar_raw.get("status") not in ("ERROR", "DATA_UNAVAILABLE")
+        else None
     )
 
-    solar_raw = (
-        prefetched_solar_data
-        if prefetched_solar_data is not None
-        else get_solar_live()
+    wind_data = (
+        wind_raw
+        if wind_raw
+        and isinstance(wind_raw, dict)
+        and wind_raw.get("status") not in ("ERROR", "DATA_UNAVAILABLE")
+        else None
     )
-    solar_data = solar_raw if solar_raw and solar_raw.get("status") != "ERROR" else None
-
-    wind_raw = (
-        prefetched_wind_data
-        if prefetched_wind_data is not None
-        else get_wind_live()
-    )
-    wind_data = wind_raw if wind_raw and wind_raw.get("status") != "ERROR" else None
 
     resources = {}
 
@@ -232,7 +267,8 @@ def fetch_all_resources(
         "expected_energy_mwh_per_1mw_24h":
             solar_best_energy,
         "source": "Open-Meteo + PowerFlex Solar AI",
-        "data_classification": "LIVE",
+        "data_classification": "FORECAST",
+        "note": "Weather-driven model prediction, not measured generation.",
     }
 
     # -------------------------------------------------
@@ -282,8 +318,9 @@ def fetch_all_resources(
         "best_zone": wind_best_zone,
         "expected_energy_mwh_per_1mw_24h":
             wind_best_energy,
-        "source": "Open-Meteo + PowerFlex Wind AI",
-        "data_classification": "LIVE",
+        "source": "Open-Meteo + PowerFlex Wind Power Curve",
+        "data_classification": "CALCULATED",
+        "note": "Engineering model estimate, not measured turbine generation.",
     }
 
     # -------------------------------------------------
@@ -499,8 +536,18 @@ def get_all_resources():
     Return all 9 Bangladesh electricity resources
     with current generation, source, and classification.
     """
+    import concurrent.futures
 
-    resources = fetch_all_resources()
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(fetch_all_resources)
+            resources = future.result(timeout=60)
+    except concurrent.futures.TimeoutError:
+        logger.warning("Resource fetch timed out after 60s, returning partial data")
+        resources = {}
+    except Exception as e:
+        logger.exception("Resource fetch failed")
+        resources = {}
 
     pgcb_available = sum(
         1 for r in resources.values()

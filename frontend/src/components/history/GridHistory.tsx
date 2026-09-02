@@ -56,11 +56,11 @@ export default function GridHistory() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-semibold text-slate-100">
           Grid Snapshots
         </h3>
         {data && (
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-slate-400">
             {data.total} total records
           </span>
         )}
@@ -69,13 +69,13 @@ export default function GridHistory() {
       {loading && !data && <LoadingSkeleton lines={8} />}
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950">
-          <p className="text-sm text-red-700 dark:text-red-300">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-sm text-red-400">
             Failed to load grid history: {error}
           </p>
           <button
             onClick={fetchData}
-            className="mt-2 text-sm font-medium text-red-600 underline hover:text-red-800 dark:text-red-400"
+            className="mt-2 text-sm font-medium text-red-400 underline hover:text-red-300"
           >
             Retry
           </button>
@@ -83,41 +83,41 @@ export default function GridHistory() {
       )}
 
       {data && data.data.length === 0 && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-gray-500 dark:text-gray-400">No grid snapshots recorded yet.</p>
+        <div className="rounded-lg border border-slate-700 bg-slate-800 p-8 text-center">
+          <p className="text-slate-400">No grid snapshots recorded yet.</p>
         </div>
       )}
 
       {data && data.data.length > 0 && (
         <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="overflow-x-auto rounded-lg border border-slate-700">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+              <thead className="bg-slate-800">
                 <tr>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Timestamp</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Demand</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Supply</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Deficit</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Load Shed</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Status</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Risk</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Timestamp</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Demand</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Supply</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Deficit</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Load Shed</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Status</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Risk</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              <tbody className="divide-y divide-slate-700">
                 {data.data.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{formatDate(row.timestamp)}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{fmtMw(row.demand_mw)}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{fmtMw(row.supply_mw)}</td>
-                    <td className={`px-4 py-3 ${row.deficit_mw && row.deficit_mw > 0 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}>
+                  <tr key={row.id} className="hover:bg-slate-800/50">
+                    <td className="px-4 py-3 text-slate-100">{formatDate(row.timestamp)}</td>
+                    <td className="px-4 py-3 text-slate-100">{fmtMw(row.demand_mw)}</td>
+                    <td className="px-4 py-3 text-slate-100">{fmtMw(row.supply_mw)}</td>
+                    <td className={`px-4 py-3 ${row.deficit_mw && row.deficit_mw > 0 ? "text-red-400" : "text-slate-100"}`}>
                       {fmtMw(row.deficit_mw)}
                     </td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{fmtMw(row.load_shedding_mw)}</td>
+                    <td className="px-4 py-3 text-slate-100">{fmtMw(row.load_shedding_mw)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
                         row.grid_status === "STRESSED" || row.grid_status === "CRITICAL"
-                          ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-                          : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                          ? "bg-red-500/20 text-red-400"
+                          : "bg-emerald-500/20 text-emerald-400"
                       }`}>
                         {row.grid_status || "N/A"}
                       </span>
@@ -125,10 +125,10 @@ export default function GridHistory() {
                     <td className="px-4 py-3">
                       <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
                         row.risk_level === "HIGH" || row.risk_level === "CRITICAL"
-                          ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                          ? "bg-red-500/20 text-red-400"
                           : row.risk_level === "MODERATE"
-                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-                          : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                          ? "bg-amber-500/20 text-amber-400"
+                          : "bg-emerald-500/20 text-emerald-400"
                       }`}>
                         {row.risk_level || "N/A"}
                       </span>
@@ -141,21 +141,21 @@ export default function GridHistory() {
 
           {/* Pagination */}
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-slate-400">
               Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, data.total)} of {data.total}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-700 disabled:opacity-50"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-700 disabled:opacity-50"
               >
                 Next
               </button>

@@ -1,10 +1,20 @@
 import os
 import logging
+from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 logger = logging.getLogger("powerflex.database")
+
+# Load .env file if it exists (project root)
+try:
+    from dotenv import load_dotenv
+    _env_path = Path(__file__).resolve().parent.parent / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path)
+except ImportError:
+    pass  # python-dotenv not installed; rely on OS env only
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",

@@ -15,8 +15,97 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
 }
+
+/* ===== DESIGN TOKENS ===== */
+
+/* Brand */
+:root {
+  --brand: #10b981;
+  --brand-light: #34d399;
+  --brand-dim: #059669;
+  --brand-bg: rgba(16, 185, 129, 0.12);
+  --brand-border: rgba(16, 185, 129, 0.25);
+
+  /* Surfaces */
+  --surface-page: #020617;
+  --surface-elevated: #0f172a;
+  --surface-card: rgba(15, 23, 42, 0.6);
+  --surface-card-hover: rgba(30, 41, 59, 0.5);
+  --surface-inner: rgba(15, 23, 42, 0.5);
+  --surface-border: rgba(51, 65, 85, 0.5);
+  --surface-border-subtle: rgba(51, 65, 85, 0.3);
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #020617;
+
+  /* System Status */
+  --status-live: #10b981;
+  --status-live-bg: rgba(16, 185, 129, 0.12);
+  --status-cached: #3b82f6;
+  --status-cached-bg: rgba(59, 130, 246, 0.12);
+  --status-delayed: #f59e0b;
+  --status-delayed-bg: rgba(245, 158, 11, 0.12);
+  --status-degraded: #f97316;
+  --status-degraded-bg: rgba(249, 115, 22, 0.12);
+  --status-unavailable: #64748b;
+  --status-unavailable-bg: rgba(100, 116, 139, 0.12);
+  --status-error: #ef4444;
+  --status-error-bg: rgba(239, 68, 68, 0.12);
+
+  /* Risk */
+  --risk-low: #10b981;
+  --risk-low-bg: rgba(16, 185, 129, 0.12);
+  --risk-moderate: #eab308;
+  --risk-moderate-bg: rgba(234, 179, 8, 0.12);
+  --risk-elevated: #f97316;
+  --risk-elevated-bg: rgba(249, 115, 22, 0.12);
+  --risk-high: #ef4444;
+  --risk-high-bg: rgba(239, 68, 68, 0.12);
+  --risk-critical: #dc2626;
+  --risk-critical-bg: rgba(220, 38, 38, 0.15);
+
+  /* Resource Colors */
+  --color-solar: #fbbf24;
+  --color-wind: #22d3ee;
+  --color-gas: #3b82f6;
+  --color-coal: #6b7280;
+  --color-hydro: #06b6d4;
+  --color-biomass: #10b981;
+  --color-nuclear: #a855f7;
+  --color-waste: #c084fc;
+
+  /* Spacing Scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+  --space-2xl: 2rem;
+  --space-3xl: 3rem;
+
+  /* Typography Scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.875rem;
+  --radius-full: 9999px;
+}
+
+/* ===== ANIMATIONS ===== */
 
 @keyframes pulse-slow {
   0%, 100% { opacity: 1; }
@@ -25,4 +114,95 @@ body {
 
 .animate-pulse-slow {
   animation: pulse-slow 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Ensure no horizontal overflow on dashboard */
+.dashboard-container {
+  overflow-x: hidden;
+}
+
+/* Scrollable table containers */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.3) transparent;
+}
+
+.table-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 2px;
+}
+
+/* Compact metric text */
+.metric-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Premium card surface */
+.card-surface {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl);
+}
+
+.card-surface-elevated {
+  background: var(--surface-elevated);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl);
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--brand);
+  color: var(--text-inverse);
+  font-weight: 600;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
 }

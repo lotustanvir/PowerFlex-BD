@@ -27,13 +27,13 @@ export default function SolarAI() {
 
   if (error && !data) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-        <p className="text-sm font-medium text-red-800">
+      <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-6 text-center">
+        <p className="text-sm font-medium text-red-400">
           Failed to load solar forecast data
         </p>
-        <p className="mt-1 text-xs text-red-600">{error}</p>
+        <p className="mt-1 text-xs text-red-400/70">{error}</p>
         <div className="mt-3">
-          <RefreshButton onClick={refresh} loading={loading} />
+          <RefreshButton onClick={refresh} loading={loading} variant="dark" />
         </div>
       </div>
     );
@@ -49,34 +49,40 @@ export default function SolarAI() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Solar AI — Bangladesh Solar Forecast
+          <h2 className="text-lg font-semibold text-white">
+            Solar Forecast — Bangladesh
           </h2>
           <StatusIndicator live lastUpdated={lastUpdated} />
         </div>
         <div className="flex items-center gap-2">
-          <DataBadge classification={data.status === "STALE" ? "STALE" : "LIVE"} />
-          <RefreshButton onClick={refresh} loading={loading} />
+          <DataBadge classification={data.status === "STALE" ? "STALE" : "FORECAST"} />
+          <RefreshButton onClick={refresh} loading={loading} variant="dark" />
         </div>
       </div>
 
+      {/* Classification Notice */}
+      <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-3 text-xs text-blue-300">
+        Weather-driven solar generation forecast. This is NOT measured plant output.
+        Model trained on synthetic targets — experimental, not validated against real data.
+      </div>
+
       {/* Best Solar Zone */}
-      <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <h3 className="mb-3 text-sm font-medium text-gray-500">
+      <div className="rounded-lg border border-slate-700/50 bg-slate-800/40 p-5">
+        <h3 className="mb-3 text-sm font-medium text-slate-400">
           Best Solar Zone
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs text-gray-400">Zone</p>
-            <p className="mt-0.5 text-xl font-bold text-gray-900">
+            <p className="text-xs text-slate-400">Zone</p>
+            <p className="mt-0.5 text-xl font-bold text-white">
               {best.zone ?? "N/A"}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-slate-400">
               Expected Energy (MWh per 1MW / 24h)
             </p>
-            <p className="mt-0.5 text-xl font-bold text-gray-900">
+            <p className="mt-0.5 text-xl font-bold text-white">
               {best.expected_energy_mwh_per_1mw_24h != null
                 ? best.expected_energy_mwh_per_1mw_24h.toFixed(2)
                 : "N/A"}
@@ -86,36 +92,36 @@ export default function SolarAI() {
       </div>
 
       {/* Best Hourly Opportunity */}
-      <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <h3 className="mb-3 text-sm font-medium text-gray-500">
+      <div className="rounded-lg border border-slate-700/50 bg-slate-800/40 p-5">
+        <h3 className="mb-3 text-sm font-medium text-slate-400">
           Best Hourly Opportunity
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p className="text-xs text-gray-400">Zone</p>
-            <p className="mt-0.5 text-base font-semibold text-gray-900">
+            <p className="text-xs text-slate-400">Zone</p>
+            <p className="mt-0.5 text-base font-semibold text-white">
               {opportunity.zone ?? "N/A"}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">Timestamp</p>
-            <p className="mt-0.5 text-base font-semibold text-gray-900">
+            <p className="text-xs text-slate-400">Timestamp</p>
+            <p className="mt-0.5 text-base font-semibold text-white">
               {opportunity.timestamp ?? "N/A"}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">Solar Radiation (W/m²)</p>
-            <p className="mt-0.5 text-base font-semibold text-gray-900">
+            <p className="text-xs text-slate-400">Solar Radiation (W/m²)</p>
+            <p className="mt-0.5 text-base font-semibold text-white">
               {opportunity.solar_radiation_wm2 != null
                 ? opportunity.solar_radiation_wm2.toFixed(1)
                 : "N/A"}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-slate-400">
               Predicted Generation (MW per 1MW)
             </p>
-            <p className="mt-0.5 text-base font-semibold text-gray-900">
+            <p className="mt-0.5 text-base font-semibold text-white">
               {opportunity.predicted_generation_mw_per_1mw != null
                 ? opportunity.predicted_generation_mw_per_1mw.toFixed(3)
                 : "N/A"}
@@ -125,14 +131,14 @@ export default function SolarAI() {
       </div>
 
       {/* Zone Ranking Table */}
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-5 py-3">
-          <h3 className="text-sm font-medium text-gray-500">Zone Ranking</h3>
+      <div className="rounded-lg border border-slate-700/50 bg-slate-800/40">
+        <div className="border-b border-slate-700 px-5 py-3">
+          <h3 className="text-sm font-medium text-slate-400">Zone Ranking</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-xs text-gray-500">
+              <tr className="border-b border-slate-700 bg-slate-800 text-xs text-slate-400">
                 <th className="px-5 py-2.5 font-medium">Rank</th>
                 <th className="px-5 py-2.5 font-medium">Zone</th>
                 <th className="px-5 py-2.5 font-medium">
@@ -144,25 +150,25 @@ export default function SolarAI() {
               {data.zone_ranking.map((row) => (
                 <tr
                   key={row.rank}
-                  className={`border-b border-gray-50 ${
+                  className={`border-b border-slate-700/50 ${
                     row.rank === 1
-                      ? "bg-green-50 font-medium"
-                      : "hover:bg-gray-50"
+                      ? "bg-emerald-500/10 font-medium"
+                      : "hover:bg-slate-800/50"
                   }`}
                 >
                   <td className="px-5 py-2.5">
                     <span
                       className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
                         row.rank === 1
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-100 text-gray-700"
+                          ? "bg-emerald-500 text-white"
+                          : "bg-slate-700 text-slate-300"
                       }`}
                     >
                       {row.rank}
                     </span>
                   </td>
-                  <td className="px-5 py-2.5 text-gray-900">{row.zone}</td>
-                  <td className="px-5 py-2.5 text-gray-900">
+                  <td className="px-5 py-2.5 text-white">{row.zone}</td>
+                  <td className="px-5 py-2.5 text-white">
                     {row.expected_energy_mwh_per_1mw_24h != null
                       ? row.expected_energy_mwh_per_1mw_24h.toFixed(2)
                       : "N/A"}
@@ -175,7 +181,7 @@ export default function SolarAI() {
       </div>
 
       {/* Footer info */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-gray-400">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-slate-500">
         <span>Data source: {data.data_source ?? "N/A"}</span>
         <span>
           Forecast hours: {data.forecast_hours ?? "N/A"}

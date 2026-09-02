@@ -15,6 +15,7 @@ from backend.biomass_calculator import (
     calculate_all_divisions,
     calculate_division_biomass,
 )
+from backend.services.cache import get_biomass_cache
 
 
 # =========================================================
@@ -37,33 +38,10 @@ router = APIRouter(
 
 
 # =========================================================
-# CACHE
+# CACHE — uses shared services.cache (thread-safe, TTL-based)
 # =========================================================
 
-_cache: Dict[str, Any] = {}
-
-_cache_expiry = 3600
-
-
-def get_cached(key: str):
-    import time
-
-    entry = _cache.get(key)
-
-    if entry is None:
-        return None
-
-    ts, data = entry
-
-    if time.time() - ts > _cache_expiry:
-        return None
-
-    return data
-
-
-def set_cached(key: str, data: Any):
-    import time
-    _cache[key] = (time.time(), data)
+_cache = get_biomass_cache()
 
 
 # =========================================================
@@ -78,7 +56,7 @@ def biomass_live():
     Uses fallback data by default for fast response.
     """
 
-    cached = get_cached("live")
+    cached = _cache.get("live")
 
     if cached is not None:
         return cached
@@ -153,7 +131,7 @@ def biomass_live():
                     div_data["dispatchable_mw"],
             })
 
-        set_cached("live", response)
+        _cache.set("live", response)
 
         return response
 
@@ -178,7 +156,7 @@ def biomass_divisions():
     with detailed crop and livestock data.
     """
 
-    cached = get_cached("divisions")
+    cached = _cache.get("divisions")
 
     if cached is not None:
         return cached
@@ -204,7 +182,7 @@ def biomass_divisions():
             "divisions": result["divisions"],
         }
 
-        set_cached("divisions", response)
+        _cache.set("divisions", response)
 
         return response
 
@@ -228,7 +206,7 @@ def biomass_potential():
     Return aggregated biomass potential summary.
     """
 
-    cached = get_cached("potential")
+    cached = _cache.get("potential")
 
     if cached is not None:
         return cached
@@ -314,7 +292,7 @@ def biomass_potential():
             },
         }
 
-        set_cached("potential", response)
+        _cache.set("potential", response)
 
         return response
 

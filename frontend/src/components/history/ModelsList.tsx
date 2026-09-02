@@ -42,7 +42,7 @@ export default function ModelsList() {
       }
 
       const res = await fetch(
-        `${API_BASE}/api/models?${params.toString()}`,
+        `${API_BASE}/api/models/history?${params.toString()}`,
         { headers: { Accept: "application/json" } }
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -64,11 +64,11 @@ export default function ModelsList() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-semibold text-slate-100">
           Model Registry
         </h3>
         {data && (
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-slate-400">
             {data.total} registered models
           </span>
         )}
@@ -81,7 +81,7 @@ export default function ModelsList() {
           className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
             activeFilter === null
               ? "bg-blue-600 text-white"
-              : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+              : "border border-slate-600 bg-slate-800 text-slate-300 hover:bg-slate-700"
           }`}
         >
           All
@@ -90,8 +90,8 @@ export default function ModelsList() {
           onClick={() => { setActiveFilter(true); setPage(0); }}
           className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
             activeFilter === true
-              ? "bg-green-600 text-white"
-              : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+              ? "bg-emerald-600 text-white"
+              : "border border-slate-600 bg-slate-800 text-slate-300 hover:bg-slate-700"
           }`}
         >
           Active
@@ -100,8 +100,8 @@ export default function ModelsList() {
           onClick={() => { setActiveFilter(false); setPage(0); }}
           className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
             activeFilter === false
-              ? "bg-gray-600 text-white"
-              : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+              ? "bg-slate-600 text-white"
+              : "border border-slate-600 bg-slate-800 text-slate-300 hover:bg-slate-700"
           }`}
         >
           Inactive
@@ -111,13 +111,13 @@ export default function ModelsList() {
       {loading && !data && <LoadingSkeleton lines={6} />}
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950">
-          <p className="text-sm text-red-700 dark:text-red-300">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-sm text-red-400">
             Failed to load model registry: {error}
           </p>
           <button
             onClick={fetchData}
-            className="mt-2 text-sm font-medium text-red-600 underline hover:text-red-800 dark:text-red-400"
+            className="mt-2 text-sm font-medium text-red-400 underline hover:text-red-300"
           >
             Retry
           </button>
@@ -125,44 +125,44 @@ export default function ModelsList() {
       )}
 
       {data && data.data.length === 0 && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-gray-500 dark:text-gray-400">No models registered yet.</p>
+        <div className="rounded-lg border border-slate-700 bg-slate-800 p-8 text-center">
+          <p className="text-slate-400">No models registered yet.</p>
         </div>
       )}
 
       {data && data.data.length > 0 && (
         <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="overflow-x-auto rounded-lg border border-slate-700">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800">
+              <thead className="bg-slate-800">
                 <tr>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Type</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Trained At</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Samples</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">MAE</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">RMSE</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">R²</th>
-                  <th className="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">Status</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Type</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Trained At</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Samples</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">MAE</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">RMSE</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">R²</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              <tbody className="divide-y divide-slate-700">
                 {data.data.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <tr key={row.id} className="hover:bg-slate-800/50">
                     <td className="px-4 py-3">
-                      <span className="inline-flex rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                      <span className="inline-flex rounded-full bg-purple-500/20 px-2 py-1 text-xs font-medium text-purple-400">
                         {row.model_type}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{formatDate(row.trained_at)}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{row.training_samples?.toLocaleString() || "N/A"}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{fmtNum(row.mae)}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{fmtNum(row.rmse)}</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{fmtNum(row.r2)}</td>
+                    <td className="px-4 py-3 text-slate-100">{formatDate(row.trained_at)}</td>
+                    <td className="px-4 py-3 text-slate-100">{row.training_samples?.toLocaleString() || "N/A"}</td>
+                    <td className="px-4 py-3 text-slate-100">{fmtNum(row.mae)}</td>
+                    <td className="px-4 py-3 text-slate-100">{fmtNum(row.rmse)}</td>
+                    <td className="px-4 py-3 text-slate-100">{fmtNum(row.r2)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
                         row.is_active
-                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : "bg-slate-700 text-slate-300"
                       }`}>
                         {row.is_active ? "Active" : "Inactive"}
                       </span>
@@ -175,21 +175,21 @@ export default function ModelsList() {
 
           {/* Pagination */}
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-slate-400">
               Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, data.total)} of {data.total}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-700 disabled:opacity-50"
               >
                 Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-slate-700 disabled:opacity-50"
               >
                 Next
               </button>

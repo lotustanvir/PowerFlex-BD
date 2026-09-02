@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     Column,
@@ -14,6 +14,10 @@ from sqlalchemy import (
 from database.connection import Base
 
 
+def _utcnow():
+    return datetime.now(timezone.utc)
+
+
 class DemandHistory(Base):
     __tablename__ = "demand_history"
 
@@ -26,7 +30,7 @@ class DemandHistory(Base):
     deficit_mw = Column(Numeric(10, 2))
     source = Column(String(50), default="pgcb")
     data_classification = Column(String(30), default="actual")
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utcnow)
 
     __table_args__ = (
         Index("idx_demand_history_ts", "timestamp", postgresql_using="btree"),
@@ -39,6 +43,7 @@ class GridSnapshot(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
+    collected_at = Column(DateTime(timezone=True), default=_utcnow)
     demand_mw = Column(Numeric(10, 2))
     supply_mw = Column(Numeric(10, 2))
     load_shedding_mw = Column(Numeric(10, 2))
@@ -52,8 +57,10 @@ class GridSnapshot(Base):
     import_mw = Column(Numeric(10, 2))
     grid_status = Column(String(20))
     risk_level = Column(String(20))
+    source = Column(String(50), default="PGCB_ERP")
+    data_classification = Column(String(30), default="OFFICIAL_PGCB")
     raw_html = Column(Text)
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utcnow)
 
     __table_args__ = (
         Index("idx_grid_snapshots_ts", "timestamp", postgresql_using="btree"),
@@ -71,7 +78,7 @@ class AIPrediction(Base):
     actual_mw = Column(Numeric(10, 2))
     features_json = Column(JSON)
     model_version = Column(String(50))
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utcnow)
 
     __table_args__ = (
         Index("idx_predictions_ts", "timestamp", postgresql_using="btree"),
@@ -98,7 +105,7 @@ class LoadshieldDispatch(Base):
     status = Column(String(30))
     risk_level = Column(String(30))
     zone_breakdown = Column(JSON)
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utcnow)
 
     __table_args__ = (
         Index("idx_dispatches_ts", "timestamp", postgresql_using="btree"),
@@ -118,7 +125,7 @@ class ModelRegistry(Base):
     r2 = Column(Numeric(6, 4))
     features = Column(JSON)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=_utcnow)
 
     __table_args__ = (
         Index("idx_model_registry_type", "model_type"),
